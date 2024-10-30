@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -30,18 +30,22 @@ class _LoginPageState extends State<LoginPage> {
           Icon(
             Icons.lock_open_rounded,
             size: 100,
-            color: Theme.of(context).colorScheme.inversePrimary,
+            color: Colors.grey.shade400,
           ),
+          SizedBox(
+            height: 15,
+          ),
+          Text('Welcome Back ! You"ve been missed !'),
           SizedBox(
             height: 25,
           ),
 
           //welcome msg
           Text(
-            'Food Delivery App',
+            'TicketVerse',
             style: TextStyle(
               fontSize: 16,
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Colors.grey.shade700,
             ),
           ),
           SizedBox(
@@ -78,9 +82,9 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Not a member ?',
+                'Not a member ? ',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.inversePrimary,
+                  color: Colors.grey.shade600,
                 ),
               ),
               GestureDetector(
@@ -88,8 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Text(
                   'Register now ',
                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.inversePrimary,
-                      fontWeight: FontWeight.bold),
+                      color: Colors.grey.shade700, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
