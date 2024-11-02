@@ -24,6 +24,7 @@ flutter:
 
   assets:
     - assets/logo.png
+    - assets/google.jpeg
 
   # Optional custom fonts section:
   # fonts:
