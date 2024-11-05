@@ -13,6 +13,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   http:   # Replace with the latest version
   google_fonts: ^6.2.1
+  mobile_scanner:
+  qr_flutter:
 
 dev_dependencies:
   flutter_test:

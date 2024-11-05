@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:graphixui/pages/result_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:scanner_app/result_screen.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 const bgColor = Color(0xfffafafa);
 
@@ -51,7 +51,6 @@ class _QrScannerState extends State<QrScanner> {
         final data = jsonDecode(response.body);
         String verificationStatus = data['status'] ?? 'Verification successful';
 
-        // Navigate to ResultScreen with verification result
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -90,7 +89,7 @@ class _QrScannerState extends State<QrScanner> {
           IconButton(
             icon: const Icon(Icons.camera_alt),
             onPressed: () => cameraController.switchCamera(),
-          ), 
+          ),
         ],
       ),
       body: Column(
@@ -136,8 +135,6 @@ class _QrScannerState extends State<QrScanner> {
                         if (!isScanCompleted && barcodes.isNotEmpty) {
                           final String code = barcodes.first.rawValue ?? '---';
                           isScanCompleted = true;
-
-                          // Call the verification API
                           verifyQrCode(code);
                         }
                       },

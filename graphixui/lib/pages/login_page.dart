@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
+import 'package:graphixui/pages/register_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -20,10 +23,30 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void onLogin() {
+  Future<void> onLogin() async {
     if (usernameController.text.isNotEmpty &&
         passwordController.text.isNotEmpty) {
-      // Implement your login logic here, use selectedRole as needed
+      final response = await http.post(
+        Uri.parse('https://mqnmrqvamm.us-east-1.awsapprunner.com/api/admin/login'), // Replace with your API endpoint
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': usernameController.text,
+          'password': passwordController.text,
+          'role': selectedRole,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Successful login
+        Navigator.pushNamed(context, '/qr_scanner'); // Navigate to QR Scanner
+      } else {
+        // Handle error response
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login failed: ${response.body}")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Please fill all the fields")));
@@ -35,13 +58,13 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 8, 5, 61), // AppBar color
+        backgroundColor: const Color.fromARGB(255, 8, 5, 61),
         flexibleSpace: Container(
           padding: EdgeInsets.all(25),
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/logo.png'), // Your logo path here
-              // Ensure the image covers the area
+              image: AssetImage('assets/logo.png'), // Path to your logo image
+              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -65,8 +88,6 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   // Dropdown for user role selection
                   DropdownButtonFormField<String>(
-                    padding: EdgeInsets.symmetric(horizontal: 25),
-                    borderRadius: BorderRadius.circular(18),
                     value: selectedRole,
                     items: <String>['User', 'Organizer', 'Admin']
                         .map((String role) {
@@ -82,7 +103,10 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     decoration: InputDecoration(
                       hintText: 'Select Role',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 25),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -95,7 +119,19 @@ class _LoginPageState extends State<LoginPage> {
                   MyTextField(
                     controller: passwordController,
                     hintText: "Password",
-                    obscureText: true,
+                    obscureText: !showPassword,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: togglePasswordVisibility,
+                        child: Text(
+                          showPassword ? "Hide Password" : "Show Password",
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 30),
                   Center(
@@ -110,8 +146,8 @@ class _LoginPageState extends State<LoginPage> {
                             // Google login handler
                           },
                           icon: Image.asset(
-                            'assets/google.jpeg', // Your Google icon path here
-                            height: 20, // Adjust icon size
+                            'assets/google.jpeg', // Path to Google icon
+                            height: 20,
                             width: 20,
                           ),
                           label: Text(
@@ -129,9 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             // Facebook login handler
                           },
-                          icon: Icon(Icons.facebook,
-                              color: Colors
-                                  .white), // Placeholder for Facebook icon
+                          icon: Icon(Icons.facebook, color: Colors.white),
                           label: Text(
                             'Login with Facebook',
                             style: TextStyle(color: Colors.white),
@@ -149,7 +183,10 @@ class _LoginPageState extends State<LoginPage> {
                   Center(
                     child: TextButton(
                       onPressed: () {
-                        // Navigate to the registration screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                        );
                       },
                       child: Text(
                         'New User? Sign Up',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+
 const bgColor = Color(0xfffafafa);
 
 class ResultScreen extends StatelessWidget {
