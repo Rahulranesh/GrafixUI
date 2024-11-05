@@ -16,9 +16,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String selectedRole = 'User';
-  bool checkbox = false;
+  bool checkbox = false; // For terms and conditions acceptance
+  String selectedRole = 'User'; // Default selected role
   bool showPassword = false;
+
+  // Roles options for registration
+  final List<String> roles = ['User', 'Organizer', 'Admin'];
 
   void togglePasswordVisibility() {
     setState(() {
@@ -28,71 +31,76 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> onSubmit() async {
     if (!checkbox) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          content: Text("Please accept the terms and conditions"),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
-      );
+      _showErrorDialog("Please accept the terms and conditions");
+      return;
     } else if (firstNameController.text.isEmpty ||
         lastNameController.text.isEmpty ||
         usernameController.text.isEmpty ||
         emailController.text.isEmpty ||
         passwordController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          content: Text("Please fill all the fields"),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Handle registration logic here
+      _showErrorDialog("Please fill all the fields");
+      return;
+    }
+
+    // Map of roles to corresponding API endpoints
+    final roleEndpoints = {
+      'User': 'https://yourapi.com/api/user/register',
+      'Organizer': 'https://yourapi.com/api/organizer/register',
+      'Admin':
+          'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/admin/register',
+    };
+
+    final String url = roleEndpoints[selectedRole]!;
+
+    // Send the registration request
+    try {
       final response = await http.post(
-        Uri.parse('https://mqnmrqvamm.us-east-1.awsapprunner.com/api/admin/register'), // Replace with your API endpoint
+        Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'firstName': firstNameController.text,
-          'lastName': lastNameController.text,
+          'first_name': firstNameController.text, // Changed to "first_name"
+          'last_name': lastNameController.text, // Changed to "last_name"
           'username': usernameController.text,
           'email': emailController.text,
           'password': passwordController.text,
-          'role': selectedRole,
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         // Registration successful
-        Navigator.pop(context); // Go back to login page or main page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration successful!")),
+        );
+        Navigator.pop(context); // Navigate back to login page or main page
       } else {
-        // Handle error response
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            content: Text("Registration failed: ${response.body}"),
-            actions: <Widget>[
-              TextButton(
-                child: Text("OK"),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
+        // Display the actual response body in case of failure
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration failed: ${response.body}")),
         );
       }
+    } catch (e) {
+      // Handle any errors during the request
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -122,13 +130,13 @@ class _RegisterPageState extends State<RegisterPage> {
             Text('Make your events visible by ticketverse',
                 style: TextStyle(color: Colors.grey)),
             SizedBox(height: 16),
-            
+
             // Role Selection Dropdown
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: DropdownButtonFormField<String>(
                 value: selectedRole,
-                items: <String>['User', 'Organizer', 'Admin'].map((String role) {
+                items: roles.map((String role) {
                   return DropdownMenuItem<String>(
                     value: role,
                     child: Text(role),

@@ -26,15 +26,24 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> onLogin() async {
     if (usernameController.text.isNotEmpty &&
         passwordController.text.isNotEmpty) {
+      // Map of roles to corresponding API endpoints
+      final roleEndpoints = {
+        'User': 'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/auth/login',
+        'Organizer': 'https://yourapi.com/api/auth/org/login',
+        'Admin':
+            'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/admin/login',
+      };
+
+      final String url = roleEndpoints[selectedRole]!;
+
       final response = await http.post(
-        Uri.parse('https://mqnmrqvamm.us-east-1.awsapprunner.com/api/admin/login'), // Replace with your API endpoint
+        Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'username': usernameController.text,
           'password': passwordController.text,
-          'role': selectedRole,
         }),
       );
 
@@ -64,7 +73,6 @@ class _LoginPageState extends State<LoginPage> {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage('assets/logo.png'), // Path to your logo image
-              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -185,7 +193,8 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                          MaterialPageRoute(
+                              builder: (context) => RegisterPage()),
                         );
                       },
                       child: Text(
