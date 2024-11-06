@@ -73,140 +73,149 @@ class _LoginPageState extends State<LoginPage> {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage('assets/logo.png'), // Path to your logo image
+              fit: BoxFit.contain,
             ),
           ),
         ),
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 30),
             Text(
-              'Login ',
+              'Login',
               style: GoogleFonts.roboto(
-                fontSize: 30,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
             ),
+            SizedBox(height: 20),
+
+            // Role Selection Dropdown
             Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Dropdown for user role selection
-                  DropdownButtonFormField<String>(
-                    value: selectedRole,
-                    items: <String>['User', 'Organizer', 'Admin']
-                        .map((String role) {
-                      return DropdownMenuItem<String>(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedRole = newValue!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Select Role',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 25),
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20), // Same radius
+                ),
+                child: DropdownButtonFormField<String>(
+                  value: selectedRole,
+                  items: <String>['User', 'Organizer', 'Admin']
+                      .map((String role) {
+                    return DropdownMenuItem<String>(
+                      value: role,
+                      child: Text(role),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedRole = newValue!;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Select Role',
+                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), 
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20), // Match radius
                     ),
                   ),
-                  SizedBox(height: 16),
-                  MyTextField(
-                    controller: usernameController,
-                    hintText: "Username",
-                    obscureText: false,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Input Fields
+            MyTextField(
+                controller: usernameController,
+                hintText: "Username",
+                obscureText: false),
+            SizedBox(height: 20),
+            MyTextField(
+                controller: passwordController,
+                hintText: "Password",
+                obscureText: !showPassword),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: togglePasswordVisibility,
+                  child: Text(
+                    showPassword ? "Hide Password" : "Show Password",
+                    style: TextStyle(color: Colors.blue),
                   ),
-                  SizedBox(height: 16),
-                  MyTextField(
-                    controller: passwordController,
-                    hintText: "Password",
-                    obscureText: !showPassword,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: togglePasswordVisibility,
-                        child: Text(
-                          showPassword ? "Hide Password" : "Show Password",
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 30),
-                  Center(
-                    child: MyButton(onTap: onLogin, text: "Login"),
-                  ),
-                  SizedBox(height: 25),
-                  Center(
-                    child: Column(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // Google login handler
-                          },
-                          icon: Image.asset(
-                            'assets/google.jpeg', // Path to Google icon
-                            height: 20,
-                            width: 20,
-                          ),
-                          label: Text(
-                            'Login with Google',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 15),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // Facebook login handler
-                          },
-                          icon: Icon(Icons.facebook, color: Colors.white),
-                          label: Text(
-                            'Login with Facebook',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 15),
-                          ),
-                        ),
-                      ],
+                ),
+              ],
+            ),
+            SizedBox(height: 30),
+
+            // Login Button
+            MyButton(onTap: onLogin, text: "Login"),
+            SizedBox(height: 25),
+
+            // Google and Facebook Login Options
+            Center(
+              child: Column(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Google login handler
+                    },
+                    icon: Image.asset(
+                      'assets/google.jpeg', // Path to Google icon
+                      height: 20,
+                      width: 20,
+                    ),
+                    label: Text(
+                      'Login with Google',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 15),
                     ),
                   ),
                   SizedBox(height: 10),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RegisterPage()),
-                        );
-                      },
-                      child: Text(
-                        'New User? Sign Up',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Facebook login handler
+                    },
+                    icon: Icon(Icons.facebook, color: Colors.white),
+                    label: Text(
+                      'Login with Facebook',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 15),
                     ),
                   ),
                 ],
+              ),
+            ),
+            SizedBox(height: 10),
+
+            // Link to Register Page
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => RegisterPage()),
+                  );
+                },
+                child: Text(
+                  'New User? Sign Up',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

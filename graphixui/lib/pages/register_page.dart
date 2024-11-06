@@ -60,8 +60,8 @@ class _RegisterPageState extends State<RegisterPage> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'first_name': firstNameController.text, // Changed to "first_name"
-          'last_name': lastNameController.text, // Changed to "last_name"
+          'first_name': firstNameController.text,
+          'last_name': lastNameController.text,
           'username': usernameController.text,
           'email': emailController.text,
           'password': passwordController.text,
@@ -75,7 +75,6 @@ class _RegisterPageState extends State<RegisterPage> {
         );
         Navigator.pop(context); // Navigate back to login page or main page
       } else {
-        // Display the actual response body in case of failure
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Registration failed: ${response.body}")),
         );
@@ -106,13 +105,14 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 8, 5, 61),
         flexibleSpace: Container(
           padding: EdgeInsets.all(25),
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/logo.png'), // Path to your logo image
+              image: AssetImage('assets/logo.png'),
             ),
           ),
         ),
@@ -127,33 +127,45 @@ class _RegisterPageState extends State<RegisterPage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 5),
-            Text('Make your events visible by ticketverse',
-                style: TextStyle(color: Colors.grey)),
+            Text(
+              'Make your events visible by ticketverse',
+              style: TextStyle(color: Colors.grey),
+            ),
             SizedBox(height: 16),
 
             // Role Selection Dropdown
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: DropdownButtonFormField<String>(
-                value: selectedRole,
-                items: roles.map((String role) {
-                  return DropdownMenuItem<String>(
-                    value: role,
-                    child: Text(role),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedRole = newValue!;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Select Role',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
+  padding: const EdgeInsets.all(20),
+  child: Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(20), // Increase the radius for more circular edges
+      
+    ),
+    child: DropdownButtonFormField<String>(
+      value: selectedRole,
+      items: roles.map((String role) {
+        return DropdownMenuItem<String>(
+          value: role,
+          child: Text(role),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedRole = newValue!;
+        });
+      },
+      decoration: InputDecoration(
+        hintText: 'Select Role',
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Optional for better padding
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20), // Ensure this matches the container's border radius
+        ),
+      ),
+    ),
+  ),
+)
+,
+            SizedBox(height: 10),
 
             // Input Fields
             MyTextField(
@@ -226,12 +238,20 @@ class _RegisterPageState extends State<RegisterPage> {
                     MaterialPageRoute(builder: (context) => LoginPage()),
                   );
                 },
-                child: Text(
-                  'Already have an account? Login',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Already have an account?',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),Text('Login',style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.bold,
+                    ),)
+                  ],
                 ),
               ),
             ),
