@@ -43,6 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
+<<<<<<< HEAD
       // Call the register method from ApiService
       final response = await _apiService.register(
         firstNameController.text,
@@ -58,6 +59,33 @@ class _RegisterPageState extends State<RegisterPage> {
         SnackBar(content: Text("Registration successful!")),
       );
       Navigator.pop(context); // Navigate back to login page or main page
+=======
+      final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'first_name': firstNameController.text,
+          'last_name': lastNameController.text,
+          'username': usernameController.text,
+          'email': emailController.text,
+          'password': passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Registration successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration successful!")),
+        );
+        Navigator.pop(context); // Navigate back to login page or main page
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration failed: ${response.body}")),
+        );
+      }
+>>>>>>> 9f25595862d6331dc2bb7d67851f02a3ddfdd37b
     } catch (e) {
       // Handle any errors during the registration request
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,6 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 8, 5, 61),
         flexibleSpace: Container(
@@ -105,33 +134,45 @@ class _RegisterPageState extends State<RegisterPage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 5),
-            Text('Make your events visible by ticketverse',
-                style: TextStyle(color: Colors.grey)),
+            Text(
+              'Make your events visible by ticketverse',
+              style: TextStyle(color: Colors.grey),
+            ),
             SizedBox(height: 16),
 
             // Role Selection Dropdown
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: DropdownButtonFormField<String>(
-                value: selectedRole,
-                items: roles.map((String role) {
-                  return DropdownMenuItem<String>(
-                    value: role,
-                    child: Text(role),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedRole = newValue!;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Select Role',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
+  padding: const EdgeInsets.all(20),
+  child: Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(20), // Increase the radius for more circular edges
+      
+    ),
+    child: DropdownButtonFormField<String>(
+      value: selectedRole,
+      items: roles.map((String role) {
+        return DropdownMenuItem<String>(
+          value: role,
+          child: Text(role),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedRole = newValue!;
+        });
+      },
+      decoration: InputDecoration(
+        hintText: 'Select Role',
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Optional for better padding
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20), // Ensure this matches the container's border radius
+        ),
+      ),
+    ),
+  ),
+)
+,
+            SizedBox(height: 10),
 
             // Input Fields
             MyTextField(
@@ -204,12 +245,20 @@ class _RegisterPageState extends State<RegisterPage> {
                     MaterialPageRoute(builder: (context) => LoginPage()),
                   );
                 },
-                child: Text(
-                  'Already have an account? Login',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Already have an account?',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),Text('Login',style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.bold,
+                    ),)
+                  ],
                 ),
               ),
             ),

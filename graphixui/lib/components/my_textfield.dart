@@ -22,7 +22,7 @@ class _MyTextFieldState extends State<MyTextField> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0), // Adjust padding
       child: MouseRegion(
         onEnter: (_) => _setHovered(true), // Handle hover enter
         onExit: (_) => _setHovered(false), // Handle hover exit
@@ -31,7 +31,8 @@ class _MyTextFieldState extends State<MyTextField> {
           obscureText: widget.obscureText,
           cursorColor: Theme.of(context).colorScheme.primary, // Cursor color
           style: const TextStyle(
-              color: Colors.black), // Text color inside the field
+            color: Colors.black, // Text color inside the field
+          ),
           decoration: InputDecoration(
             filled: true, // Enables fill color
             fillColor: _isHovered
@@ -39,12 +40,12 @@ class _MyTextFieldState extends State<MyTextField> {
                 : Theme.of(context)
                     .colorScheme
                     .secondary
-                    .withOpacity(0.1), // Background color
+                    .withOpacity(0.1), // Background color on hover
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: Colors.black, // Border color when not focused
               ),
-              borderRadius: BorderRadius.circular(12), // Rounded corners
+              borderRadius: BorderRadius.circular(20), // More circular border
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
@@ -53,12 +54,14 @@ class _MyTextFieldState extends State<MyTextField> {
                     .primary, // Border color when focused
                 width: 2.0,
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20), // More circular border
             ),
             hintText: widget.hintText,
             hintStyle: const TextStyle(color: Colors.grey), // Hint text color
             contentPadding: const EdgeInsets.symmetric(
-                vertical: 18, horizontal: 15), // Inner padding
+              vertical: 18, 
+              horizontal: 15, // Inner padding
+            ),
           ),
         ),
       ),
