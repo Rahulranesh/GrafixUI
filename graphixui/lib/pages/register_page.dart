@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
+import 'package:graphixui/services/api_service.dart';
+// Import the ApiService
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -16,12 +16,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool checkbox = false; // For terms and conditions acceptance
-  String selectedRole = 'User'; // Default selected role
+  bool checkbox = false;
+  String selectedRole = 'User';
   bool showPassword = false;
 
-  // Roles options for registration
   final List<String> roles = ['User', 'Organizer', 'Admin'];
+  final ApiService _apiService = ApiService(); // Instantiate ApiService
 
   void togglePasswordVisibility() {
     setState(() {
@@ -42,46 +42,24 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Map of roles to corresponding API endpoints
-    final roleEndpoints = {
-      'User': 'https://yourapi.com/api/user/register',
-      'Organizer': 'https://yourapi.com/api/organizer/register',
-      'Admin':
-          'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/admin/register',
-    };
-
-    final String url = roleEndpoints[selectedRole]!;
-
-    // Send the registration request
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'first_name': firstNameController.text, // Changed to "first_name"
-          'last_name': lastNameController.text, // Changed to "last_name"
-          'username': usernameController.text,
-          'email': emailController.text,
-          'password': passwordController.text,
-        }),
+      // Call the register method from ApiService
+      final response = await _apiService.register(
+        firstNameController.text,
+        lastNameController.text,
+        usernameController.text,
+        emailController.text,
+        passwordController.text,
+        selectedRole,
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        // Registration successful
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration successful!")),
-        );
-        Navigator.pop(context); // Navigate back to login page or main page
-      } else {
-        // Display the actual response body in case of failure
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration failed: ${response.body}")),
-        );
-      }
+      // If registration is successful, show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Registration successful!")),
+      );
+      Navigator.pop(context); // Navigate back to login page or main page
     } catch (e) {
-      // Handle any errors during the request
+      // Handle any errors during the registration request
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
@@ -112,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
           padding: EdgeInsets.all(25),
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/logo.png'), // Path to your logo image
+              image: AssetImage('assets/logo.png'),
             ),
           ),
         ),
