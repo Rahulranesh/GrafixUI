@@ -4,12 +4,14 @@ class MyTextField extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
   final bool obscureText;
+  final Widget? suffixIcon; // Add suffixIcon parameter
 
   const MyTextField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
+    this.suffixIcon,
   });
 
   @override
@@ -42,7 +44,7 @@ class _MyTextFieldState extends State<MyTextField> {
                     .secondary
                     .withOpacity(0.1), // Background color on hover
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: Colors.black, // Border color when not focused
               ),
               borderRadius: BorderRadius.circular(20), // More circular border
@@ -59,9 +61,10 @@ class _MyTextFieldState extends State<MyTextField> {
             hintText: widget.hintText,
             hintStyle: const TextStyle(color: Colors.grey), // Hint text color
             contentPadding: const EdgeInsets.symmetric(
-              vertical: 18, 
-              horizontal: 15, // Inner padding
+              vertical: 10,
+              horizontal: 10, // Inner padding
             ),
+            suffixIcon: widget.suffixIcon, // Add suffixIcon here
           ),
         ),
       ),

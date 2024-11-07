@@ -54,8 +54,15 @@ class ApiService {
     }
   }
 
-  Future<dynamic> register(String firstName, String lastName, String username,
-      String email, String password, String selectedRole) async {
+  Future<dynamic> register(
+    String firstName,
+    String lastName,
+    String username,
+    String email,
+    String password,
+    String selectedRole, {
+    String? name,
+  }) async {
     final roleEndpoints = {
       'User': '$baseUrl/auth/register',
       'Organizer': '$baseUrl/auth/org/register',
@@ -65,16 +72,26 @@ class ApiService {
     final String url = roleEndpoints[selectedRole]!;
 
     try {
+      // Prepare the request body
+      Map<String, dynamic> body = {
+        'username': username,
+        'email': email,
+        'password': password,
+      };
+
+      // Include the name in the body if the role is Organizer
+      if (selectedRole == 'Organizer' && name != null) {
+        body['name'] = name; // Only include the name field
+      } else {
+        // Include first_name and last_name for User and Admin roles
+        body['first_name'] = firstName;
+        body['last_name'] = lastName;
+      }
+
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'first_name': firstName,
-          'last_name': lastName,
-          'username': username,
-          'email': email,
-          'password': password,
-        }),
+        body: json.encode(body),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {

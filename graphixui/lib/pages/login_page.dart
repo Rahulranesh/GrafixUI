@@ -81,18 +81,14 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.all(25),
           decoration: BoxDecoration(
             image: DecorationImage(
-<<<<<<< HEAD
               image: AssetImage('assets/logo.png'),
-=======
-              image: AssetImage('assets/logo.png'), // Path to your logo image
-              fit: BoxFit.contain,
->>>>>>> 9f25595862d6331dc2bb7d67851f02a3ddfdd37b
             ),
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0)
+            .copyWith(top: 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -104,12 +100,19 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.black,
               ),
             ),
-<<<<<<< HEAD
+            SizedBox(
+              height: 7,
+            ),
+            Text(
+              'Make your events visible by ticketverse',
+              style: TextStyle(color: Colors.grey),
+            ),
+            SizedBox(height: 14),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
                   child: DropdownButtonFormField<String>(
                     value: selectedRole,
                     items: <String>['User', 'Organizer', 'Admin']
@@ -127,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       hintText: 'Select Role',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 15),
                     ),
@@ -144,18 +147,13 @@ class _LoginPageState extends State<LoginPage> {
                   controller: passwordController,
                   hintText: "Password",
                   obscureText: !showPassword,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: togglePasswordVisibility,
-                      child: Text(
-                        showPassword ? "Hide Password" : "Show Password",
-                        style: TextStyle(color: Colors.blue),
-                      ),
+                  suffixIcon: GestureDetector(
+                    onTap: togglePasswordVisibility,
+                    child: Icon(
+                      showPassword ? Icons.visibility : Icons.visibility_off,
+                      color: Colors.grey,
                     ),
-                  ],
+                  ),
                 ),
                 SizedBox(height: 30),
                 Center(
@@ -167,10 +165,13 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: _handleGoogleLogin,
-                        icon: Image.asset(
-                          'assets/google.jpeg',
-                          height: 20,
-                          width: 20,
+                        icon: ClipRRect(
+                          borderRadius: BorderRadius.circular(25),
+                          child: Image.asset(
+                            'assets/google.jpeg',
+                            height: 20,
+                            width: 20,
+                          ),
                         ),
                         label: Text(
                           'Login with Google',
@@ -214,109 +215,6 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
-=======
-            SizedBox(height: 20),
-
-            // Role Selection Dropdown
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20), // Same radius
-                ),
-                child: DropdownButtonFormField<String>(
-                  value: selectedRole,
-                  items: <String>['User', 'Organizer', 'Admin']
-                      .map((String role) {
-                    return DropdownMenuItem<String>(
-                      value: role,
-                      child: Text(role),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedRole = newValue!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Select Role',
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), 
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20), // Match radius
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-
-            // Input Fields
-            MyTextField(
-                controller: usernameController,
-                hintText: "Username",
-                obscureText: false),
-            SizedBox(height: 20),
-            MyTextField(
-                controller: passwordController,
-                hintText: "Password",
-                obscureText: !showPassword),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: togglePasswordVisibility,
-                  child: Text(
-                    showPassword ? "Hide Password" : "Show Password",
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30),
-
-            // Login Button
-            MyButton(onTap: onLogin, text: "Login"),
-            SizedBox(height: 25),
-
-            // Google and Facebook Login Options
-            Center(
-              child: Column(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Google login handler
-                    },
-                    icon: Image.asset(
-                      'assets/google.jpeg', // Path to Google icon
-                      height: 20,
-                      width: 20,
-                    ),
-                    label: Text(
-                      'Login with Google',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 15),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Facebook login handler
-                    },
-                    icon: Icon(Icons.facebook, color: Colors.white),
-                    label: Text(
-                      'Login with Facebook',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 15),
->>>>>>> 9f25595862d6331dc2bb7d67851f02a3ddfdd37b
                     ),
                   ),
                 ),
@@ -325,24 +223,6 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 10),
 
             // Link to Register Page
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => RegisterPage()),
-                  );
-                },
-                child: Text(
-                  'New User? Sign Up',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

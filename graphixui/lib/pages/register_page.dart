@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
 import 'package:graphixui/services/api_service.dart';
-// Import the ApiService
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -16,12 +15,16 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  // New controller for the name field
+  final TextEditingController nameController = TextEditingController();
+
   bool checkbox = false;
   String selectedRole = 'User';
   bool showPassword = false;
 
   final List<String> roles = ['User', 'Organizer', 'Admin'];
-  final ApiService _apiService = ApiService(); // Instantiate ApiService
+  final ApiService _apiService = ApiService();
 
   void togglePasswordVisibility() {
     setState(() {
@@ -33,18 +36,19 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!checkbox) {
       _showErrorDialog("Please accept the terms and conditions");
       return;
-    } else if (firstNameController.text.isEmpty ||
-        lastNameController.text.isEmpty ||
-        usernameController.text.isEmpty ||
+    } else if (usernameController.text.isEmpty ||
         emailController.text.isEmpty ||
-        passwordController.text.isEmpty) {
+        passwordController.text.isEmpty ||
+        (selectedRole != 'Organizer' &&
+            (firstNameController.text.isEmpty ||
+                lastNameController.text.isEmpty)) ||
+        (selectedRole == 'Organizer' && nameController.text.isEmpty)) {
+      // Check name for Organizer role
       _showErrorDialog("Please fill all the fields");
       return;
     }
 
     try {
-<<<<<<< HEAD
-      // Call the register method from ApiService
       final response = await _apiService.register(
         firstNameController.text,
         lastNameController.text,
@@ -52,42 +56,16 @@ class _RegisterPageState extends State<RegisterPage> {
         emailController.text,
         passwordController.text,
         selectedRole,
+        name: selectedRole == 'Organizer'
+            ? nameController.text
+            : null, // Send name only for Organizer
       );
 
-      // If registration is successful, show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Registration successful!")),
       );
-      Navigator.pop(context); // Navigate back to login page or main page
-=======
-      final response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'first_name': firstNameController.text,
-          'last_name': lastNameController.text,
-          'username': usernameController.text,
-          'email': emailController.text,
-          'password': passwordController.text,
-        }),
-      );
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        // Registration successful
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration successful!")),
-        );
-        Navigator.pop(context); // Navigate back to login page or main page
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration failed: ${response.body}")),
-        );
-      }
->>>>>>> 9f25595862d6331dc2bb7d67851f02a3ddfdd37b
+      Navigator.pop(context);
     } catch (e) {
-      // Handle any errors during the registration request
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
@@ -109,6 +87,17 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  void _onRoleChanged(String? newValue) {
+    setState(() {
+      selectedRole = newValue!;
+      // Clear fields for the Organizer role
+      if (selectedRole == 'Organizer') {
+        firstNameController.clear();
+        lastNameController.clear();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,7 +114,8 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12)
+            .copyWith(top: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -138,53 +128,54 @@ class _RegisterPageState extends State<RegisterPage> {
               'Make your events visible by ticketverse',
               style: TextStyle(color: Colors.grey),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 10),
 
             // Role Selection Dropdown
             Padding(
-  padding: const EdgeInsets.all(20),
-  child: Container(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(20), // Increase the radius for more circular edges
-      
-    ),
-    child: DropdownButtonFormField<String>(
-      value: selectedRole,
-      items: roles.map((String role) {
-        return DropdownMenuItem<String>(
-          value: role,
-          child: Text(role),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          selectedRole = newValue!;
-        });
-      },
-      decoration: InputDecoration(
-        hintText: 'Select Role',
-        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Optional for better padding
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20), // Ensure this matches the container's border radius
-        ),
-      ),
-    ),
-  ),
-)
-,
-            SizedBox(height: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: DropdownButtonFormField<String>(
+                value: selectedRole,
+                items: roles.map((String role) {
+                  return DropdownMenuItem<String>(
+                    value: role,
+                    child: Text(role),
+                  );
+                }).toList(),
+                onChanged: _onRoleChanged,
+                decoration: InputDecoration(
+                  hintText: 'Select Role',
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            if (selectedRole == 'Organizer') ...[
+              MyTextField(
+                  controller: nameController,
+                  hintText: "Name",
+                  obscureText: false),
+              SizedBox(height: 16),
+            ],
 
             // Input Fields
-            MyTextField(
-                controller: firstNameController,
-                hintText: "Firstname",
-                obscureText: false),
-            SizedBox(height: 16),
-            MyTextField(
-                controller: lastNameController,
-                hintText: "Lastname",
-                obscureText: false),
-            SizedBox(height: 16),
+            if (selectedRole != 'Organizer') ...[
+              MyTextField(
+                  controller: firstNameController,
+                  hintText: "Firstname",
+                  obscureText: false),
+              SizedBox(height: 16),
+              MyTextField(
+                  controller: lastNameController,
+                  hintText: "Lastname",
+                  obscureText: false),
+              SizedBox(height: 16),
+            ],
             MyTextField(
                 controller: usernameController,
                 hintText: "Username",
@@ -196,45 +187,45 @@ class _RegisterPageState extends State<RegisterPage> {
                 obscureText: false),
             SizedBox(height: 16),
             MyTextField(
-                controller: passwordController,
-                hintText: "Password",
-                obscureText: !showPassword),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onTap: togglePasswordVisibility,
-                  child: Icon(
-                    showPassword ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.grey,
-                  ),
+              controller: passwordController,
+              hintText: "Password",
+              obscureText: !showPassword,
+              suffixIcon: GestureDetector(
+                onTap: togglePasswordVisibility,
+                child: Icon(
+                  showPassword ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
                 ),
-              ],
+              ),
             ),
-            SizedBox(height: 16),
+
+            SizedBox(height: 8),
+
+            // Additional field for Organizer role
 
             // Checkbox for Terms and Conditions
             Row(
               children: [
-                Checkbox(
-                  value: checkbox,
-                  onChanged: (value) {
-                    setState(() {
-                      checkbox = value!;
-                    });
-                  },
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Checkbox(
+                    value: checkbox,
+                    onChanged: (value) {
+                      setState(() {
+                        checkbox = value!;
+                      });
+                    },
+                  ),
                 ),
-                Expanded(
-                  child: Text('I agree to terms & Policy.'),
-                ),
+                const SizedBox(width: 2), // Add a small gap if needed
+                Text('I agree to terms & Policy.'),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
             // Register Button
             MyButton(onTap: onSubmit, text: "Register"),
-            SizedBox(height: 20),
+            SizedBox(height: 8),
 
             // Login Option for Existing Users
             Center(
@@ -254,10 +245,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),Text('Login',style: TextStyle(
-                      color: Colors.grey.shade800,
-                      fontWeight: FontWeight.bold,
-                    ),)
+                    ),
+                    Text(
+                      ' Login',
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
                   ],
                 ),
               ),
