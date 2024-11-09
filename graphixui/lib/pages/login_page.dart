@@ -1,4 +1,3 @@
-// login_page.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -15,11 +14,12 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool showPassword = false;
+  bool isLoading = false;  // Track loading state
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   String selectedRole = 'User';
-  final ApiService apiService = ApiService(); // Initialize ApiService
-
+  final ApiService apiService = ApiService();
+  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   void togglePasswordVisibility() {
@@ -37,6 +37,10 @@ class _LoginPageState extends State<LoginPage> {
         'Admin': '${apiService.baseUrl}/admin/login',
       };
 
+      setState(() {
+        isLoading = true;  // Show loading spinner
+      });
+
       try {
         await apiService.login(
           usernameController.text,
@@ -46,6 +50,10 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushNamed(context, '/qr_scanner');
       } catch (e) {
         _showError("Login failed: $e");
+      } finally {
+        setState(() {
+          isLoading = false;  // Hide loading spinner
+        });
       }
     } else {
       _showError("Please fill all the fields");
@@ -54,6 +62,10 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleGoogleLogin() async {
     try {
+      setState(() {
+        isLoading = true;  // Show loading spinner
+      });
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
         final GoogleSignInAuthentication googleAuth =
@@ -63,6 +75,10 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       _showError("Error during Google login: $e");
+    } finally {
+      setState(() {
+        isLoading = false;  // Hide loading spinner
+      });
     }
   }
 
@@ -73,18 +89,17 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 8, 5, 61),
-        flexibleSpace: Container(
-          padding: EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/logo.png'),
-            ),
-          ),
+        backgroundColor: navbarColor,
+        title: const Text(
+          'Login',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0)
@@ -92,20 +107,26 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  height: 80,
+                  width: double.infinity,
+                  color: navbarColor,
+                ),
+              ],
+            ),
+            SizedBox(height: 5),
             Text(
-              'Login',
-              style: GoogleFonts.roboto(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              'Login your Account ',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: navbarColor),
             ),
-            SizedBox(
-              height: 7,
-            ),
+            SizedBox(height: 5),
             Text(
               'Make your events visible by ticketverse',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey.shade600),
             ),
             SizedBox(height: 14),
             Column(
@@ -155,74 +176,113 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 30),
-                Center(
-                  child: MyButton(onTap: onLogin, text: "Login"),
-                ),
-                SizedBox(height: 25),
-                Center(
-                  child: Column(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _handleGoogleLogin,
-                        icon: ClipRRect(
-                          borderRadius: BorderRadius.circular(25),
-                          child: Image.asset(
-                            'assets/google.jpeg',
-                            height: 20,
-                            width: 20,
+                SizedBox(height: 20),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(navbarColor),
+                        ) // Show loading spinner while logging in
+                      : ElevatedButton(
+                          onPressed: onLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: navbarColor,
+                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            minimumSize: Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
+                          child: Text(
+                            'Login',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        label: Text(
-                          'Login with Google',
-                          style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 16),
+                // Google Login Button
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(navbarColor),
+                        )
+                      : ElevatedButton.icon(
+                          onPressed: _handleGoogleLogin,
+                          icon: ClipRRect(
+                            borderRadius: BorderRadius.circular(25),
+                            child: Image.asset(
+                              'assets/google.jpeg',
+                              height: 20,
+                              width: 20,
+                            ),
+                          ),
+                          label: Text(
+                            'Login with Google',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: navbarColor,
+                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            minimumSize: Size.fromHeight(50),
+                          ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 15),
+                ),
+                SizedBox(height: 10),
+                // Facebook Login Button
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(navbarColor),
+                        )
+                      : ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.facebook, color: Colors.white),
+                          label: Text(
+                            'Login with Facebook',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: navbarColor,
+                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            minimumSize: Size.fromHeight(50),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: Icon(Icons.facebook, color: Colors.white),
-                        label: Text(
-                          'Login with Facebook',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 15),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 SizedBox(height: 10),
                 Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => RegisterPage()),
-                      );
-                    },
-                    child: Text(
-                      'New User? Sign Up',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'New User?',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => RegisterPage()),
+                          );
+                        },
+                        child: Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            color: navbarColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
             SizedBox(height: 10),
-
-            // Link to Register Page
           ],
         ),
       ),

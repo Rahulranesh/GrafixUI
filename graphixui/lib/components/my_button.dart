@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class MyButton extends StatefulWidget {
   final Function()? onTap;
   final String text;
+  final Color color; // Button color
 
   const MyButton({
     super.key,
     required this.onTap,
     required this.text,
+    required this.color,
   });
 
   @override
@@ -15,24 +17,26 @@ class MyButton extends StatefulWidget {
 }
 
 class _MyButtonState extends State<MyButton> {
-  bool _isHovered = false; // Track hover state
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => _setHovered(true), // Handle hover enter
-      onExit: (_) => _setHovered(false), // Handle hover exit
+      onEnter: (_) => _setHovered(true),
+      onExit: (_) => _setHovered(false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200), // Smooth animation
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.all(25),
-          margin: const EdgeInsets.symmetric(horizontal: 25),
+          padding: const EdgeInsets.symmetric(vertical: 10.0), 
+          margin: EdgeInsets.all(15),// Similar height as text fields
+       // Match text field margin
+          width: double.infinity, // Take full available width
           decoration: BoxDecoration(
             color: _isHovered
-                ? Colors.grey.shade400
-                : Colors.white, // Hover color similar to text fields
+                ? widget.color.withOpacity(0.8)
+                : widget.color,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -45,9 +49,9 @@ class _MyButtonState extends State<MyButton> {
           child: Center(
             child: Text(
               widget.text,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: Colors.white,
                 fontSize: 16,
               ),
             ),
@@ -57,7 +61,6 @@ class _MyButtonState extends State<MyButton> {
     );
   }
 
-  // Helper function to update hover state
   void _setHovered(bool hovered) {
     setState(() {
       _isHovered = hovered;

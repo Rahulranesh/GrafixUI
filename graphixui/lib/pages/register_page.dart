@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
 import 'package:graphixui/services/api_service.dart';
-import 'login_page.dart';
+import 'login_page.dart'; // Importing LoginPage
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -15,9 +15,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  // New controller for the name field
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController(); // Organizer name field
 
   bool checkbox = false;
   String selectedRole = 'User';
@@ -25,6 +23,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final List<String> roles = ['User', 'Organizer', 'Admin'];
   final ApiService _apiService = ApiService();
+
+  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61); // Consistent color
 
   void togglePasswordVisibility() {
     setState(() {
@@ -43,7 +43,6 @@ class _RegisterPageState extends State<RegisterPage> {
             (firstNameController.text.isEmpty ||
                 lastNameController.text.isEmpty)) ||
         (selectedRole == 'Organizer' && nameController.text.isEmpty)) {
-      // Check name for Organizer role
       _showErrorDialog("Please fill all the fields");
       return;
     }
@@ -56,9 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
         emailController.text,
         passwordController.text,
         selectedRole,
-        name: selectedRole == 'Organizer'
-            ? nameController.text
-            : null, // Send name only for Organizer
+        name: selectedRole == 'Organizer' ? nameController.text : null,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -90,7 +87,6 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onRoleChanged(String? newValue) {
     setState(() {
       selectedRole = newValue!;
-      // Clear fields for the Organizer role
       if (selectedRole == 'Organizer') {
         firstNameController.clear();
         lastNameController.clear();
@@ -103,32 +99,34 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 8, 5, 61),
-        flexibleSpace: Container(
-          padding: EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/logo.png'),
-            ),
-          ),
-        ),
+        backgroundColor: navbarColor,
+        centerTitle: true,
+        title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12)
-            .copyWith(top: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12).copyWith(top: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Centered logo
+            Center(
+              child: Image.asset(
+                'assets/logo.png', // Replace with your logo asset path
+                height: 100,
+                width: double.infinity,
+                color: navbarColor,
+              ),
+            ),SizedBox(height: 5,),
             Text(
               'Create an Account',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: navbarColor),
             ),
             SizedBox(height: 5),
             Text(
               'Make your events visible by ticketverse',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey.shade600),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
 
             // Role Selection Dropdown
             Padding(
@@ -144,47 +142,55 @@ class _RegisterPageState extends State<RegisterPage> {
                 onChanged: _onRoleChanged,
                 decoration: InputDecoration(
                   hintText: 'Select Role',
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
             ),
-            SizedBox(
-              height: 12,
-            ),
-            if (selectedRole == 'Organizer') ...[
+            SizedBox(height: 12),
+
+            // Organizer-specific fields
+            if (selectedRole == 'Organizer')
+              Column(
+                children: [
+                  MyTextField(
+                    controller: nameController,
+                    hintText: "Organization Name",
+                    obscureText: false,
+                  ),
+                  SizedBox(height: 16),
+                ],
+              ),
+
+            // User-specific fields
+            if (selectedRole != 'Organizer') ...[
               MyTextField(
-                  controller: nameController,
-                  hintText: "Name",
-                  obscureText: false),
+                controller: firstNameController,
+                hintText: "First Name",
+                obscureText: false,
+              ),
+              SizedBox(height: 16),
+              MyTextField(
+                controller: lastNameController,
+                hintText: "Last Name",
+                obscureText: false,
+              ),
               SizedBox(height: 16),
             ],
 
-            // Input Fields
-            if (selectedRole != 'Organizer') ...[
-              MyTextField(
-                  controller: firstNameController,
-                  hintText: "Firstname",
-                  obscureText: false),
-              SizedBox(height: 16),
-              MyTextField(
-                  controller: lastNameController,
-                  hintText: "Lastname",
-                  obscureText: false),
-              SizedBox(height: 16),
-            ],
             MyTextField(
-                controller: usernameController,
-                hintText: "Username",
-                obscureText: false),
+              controller: usernameController,
+              hintText: "Username",
+              obscureText: false,
+            ),
             SizedBox(height: 16),
             MyTextField(
-                controller: emailController,
-                hintText: "Email",
-                obscureText: false),
+              controller: emailController,
+              hintText: "Email",
+              obscureText: false,
+            ),
             SizedBox(height: 16),
             MyTextField(
               controller: passwordController,
@@ -198,12 +204,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             ),
-
             SizedBox(height: 8),
 
-            // Additional field for Organizer role
-
-            // Checkbox for Terms and Conditions
+            // Terms and Conditions Checkbox
             Row(
               children: [
                 Padding(
@@ -217,45 +220,49 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 2), // Add a small gap if needed
                 Text('I agree to terms & Policy.'),
               ],
             ),
-            SizedBox(height: 10),
-
-            // Register Button
-            MyButton(onTap: onSubmit, text: "Register"),
             SizedBox(height: 8),
 
-            // Login Option for Existing Users
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account?',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      ' Login',
-                      style: TextStyle(
-                        color: Colors.grey.shade800,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ],
-                ),
+            // Register Button with consistent width
+            SizedBox(
+              width: double.infinity, // Full width to match text fields
+              child: MyButton(
+                onTap: onSubmit,
+                text: "Register",
+                color: navbarColor, // Matching color with navbar
               ),
+            ),
+            SizedBox(height: 4),
+
+            // Login Option for Existing Users
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Already have an account?',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                  },
+                  child: Text(
+                    'Login',
+                    style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
