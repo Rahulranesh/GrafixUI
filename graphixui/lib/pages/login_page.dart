@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool showPassword = false;
-  bool isLoading = false;  // Track loading state
+  bool isLoading = false; // Track loading state
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   String selectedRole = 'User';
@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       setState(() {
-        isLoading = true;  // Show loading spinner
+        isLoading = true; // Show loading spinner
       });
 
       try {
@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
         _showError("Login failed: $e");
       } finally {
         setState(() {
-          isLoading = false;  // Hide loading spinner
+          isLoading = false; // Hide loading spinner
         });
       }
     } else {
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleGoogleLogin() async {
     try {
       setState(() {
-        isLoading = true;  // Show loading spinner
+        isLoading = true; // Show loading spinner
       });
 
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       _showError("Error during Google login: $e");
     } finally {
       setState(() {
-        isLoading = false;  // Hide loading spinner
+        isLoading = false; // Hide loading spinner
       });
     }
   }
@@ -95,9 +95,15 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: navbarColor,
-        title: const Text(
-          'Login',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/logo.png',
+              height: 80,
+              width: double.infinity,
+            ),
+          ],
         ),
         centerTitle: true,
       ),
@@ -107,21 +113,13 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/logo.png',
-                  height: 80,
-                  width: double.infinity,
-                  color: navbarColor,
-                ),
-              ],
-            ),
             SizedBox(height: 5),
             Text(
               'Login your Account ',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: navbarColor),
+              style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: navbarColor),
             ),
             SizedBox(height: 5),
             Text(
@@ -181,13 +179,15 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: isLoading
                       ? CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(navbarColor),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(navbarColor),
                         ) // Show loading spinner while logging in
                       : ElevatedButton(
                           onPressed: onLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: navbarColor,
-                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 15),
                             minimumSize: Size.fromHeight(50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18),
@@ -195,7 +195,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: Text(
                             'Login',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                 ),
@@ -205,7 +207,8 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: isLoading
                       ? CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(navbarColor),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(navbarColor),
                         )
                       : ElevatedButton.icon(
                           onPressed: _handleGoogleLogin,
@@ -223,7 +226,8 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: navbarColor,
-                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 15),
                             minimumSize: Size.fromHeight(50),
                           ),
                         ),
@@ -234,7 +238,8 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   child: isLoading
                       ? CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(navbarColor),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(navbarColor),
                         )
                       : ElevatedButton.icon(
                           onPressed: () {},
@@ -245,7 +250,8 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: navbarColor,
-                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 15),
                             minimumSize: Size.fromHeight(50),
                           ),
                         ),
@@ -266,7 +272,8 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => RegisterPage()),
+                            MaterialPageRoute(
+                                builder: (context) => RegisterPage()),
                           );
                         },
                         child: Text(
@@ -275,7 +282,8 @@ class _LoginPageState extends State<LoginPage> {
                             color: navbarColor,
                             fontWeight: FontWeight.bold,
                           ),
-                        ),style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                        ),
+                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
                       ),
                     ],
                   ),

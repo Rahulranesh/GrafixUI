@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:graphixui/pages/result_screen.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:mobile_scanner/mobile_scanner.dart';
 
 const bgColor = Color(0xfffafafa);
 
@@ -40,12 +40,22 @@ class _QrScannerState extends State<QrScanner> {
   Future<void> verifyQrCode(String code) async {
     final url = Uri.parse(
         'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/verifyQrCode');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Cookie':
+          'connect.sid=s%3A3WJgbI4XqOvqisTbrrnocQkNHdVYXWgN.gN6Wy6BuGWBRP3BHTlFd5xJFBiixSRnQfoPwC%2BSEnk0', // Use the actual session ID here
+    };
+
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'qrCode': code}),
+        headers: headers,
+        body: jsonEncode({'qrCodeData': code}),
       );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -61,9 +71,11 @@ class _QrScannerState extends State<QrScanner> {
           ),
         );
       } else {
+        print('Error: ${response.body}');
         throw Exception('Failed to verify QR code');
       }
     } catch (error) {
+      print('Error occurred: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error verifying QR code: $error')),
       );
@@ -135,6 +147,8 @@ class _QrScannerState extends State<QrScanner> {
                         if (!isScanCompleted && barcodes.isNotEmpty) {
                           final String code = barcodes.first.rawValue ?? '---';
                           isScanCompleted = true;
+
+                          // Call the verification API
                           verifyQrCode(code);
                         }
                       },

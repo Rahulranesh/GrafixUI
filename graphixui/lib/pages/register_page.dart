@@ -15,7 +15,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController nameController = TextEditingController(); // Organizer name field
+  final TextEditingController nameController =
+      TextEditingController(); // Organizer name field
 
   bool checkbox = false;
   String selectedRole = 'User';
@@ -24,7 +25,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final List<String> roles = ['User', 'Organizer', 'Admin'];
   final ApiService _apiService = ApiService();
 
-  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61); // Consistent color
+  final Color navbarColor =
+      const Color.fromARGB(255, 8, 5, 61); // Consistent color
 
   void togglePasswordVisibility() {
     setState(() {
@@ -100,26 +102,39 @@ class _RegisterPageState extends State<RegisterPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: navbarColor,
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/logo.png',
+              height: 80,
+              width: double.infinity,
+            ),
+          ],
+        ),
         centerTitle: true,
-        title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12).copyWith(top: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12)
+            .copyWith(top: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Centered logo
             Center(
-              child: Image.asset(
-                'assets/logo.png', // Replace with your logo asset path
-                height: 100,
-                width: double.infinity,
-                color: navbarColor,
-              ),
-            ),SizedBox(height: 5,),
+              child: Text('Register',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white)),
+            ),
+            SizedBox(
+              height: 5,
+            ),
             Text(
               'Create an Account',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: navbarColor),
+              style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: navbarColor),
             ),
             SizedBox(height: 5),
             Text(
@@ -142,7 +157,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 onChanged: _onRoleChanged,
                 decoration: InputDecoration(
                   hintText: 'Select Role',
-                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
