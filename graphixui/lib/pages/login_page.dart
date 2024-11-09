@@ -98,10 +98,12 @@ class _LoginPageState extends State<LoginPage> {
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logo.png',
-              height: 80,
-              width: double.infinity,
+            Center(
+              child: Image.asset(
+                'assets/logo.png',
+                height: 80,
+                width: double.infinity,
+              ),
             ),
           ],
         ),
@@ -109,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0)
-            .copyWith(top: 40),
+            .copyWith(top: 80),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

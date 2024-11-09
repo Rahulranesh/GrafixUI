@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
 import 'package:graphixui/services/api_service.dart';
-import 'login_page.dart'; // Importing LoginPage
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -15,8 +15,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController nameController =
-      TextEditingController(); // Organizer name field
+  final TextEditingController nameController = TextEditingController();
 
   bool checkbox = false;
   String selectedRole = 'User';
@@ -25,8 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final List<String> roles = ['User', 'Organizer', 'Admin'];
   final ApiService _apiService = ApiService();
 
-  final Color navbarColor =
-      const Color.fromARGB(255, 8, 5, 61); // Consistent color
+  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
 
   void togglePasswordVisibility() {
     setState(() {
@@ -100,15 +98,17 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+       appBar: AppBar(
         backgroundColor: navbarColor,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logo.png',
-              height: 80,
-              width: double.infinity,
+            Center(
+              child: Image.asset(
+                'assets/logo.png',
+                height: 80,
+                width: double.infinity,
+              ),
             ),
           ],
         ),
@@ -116,19 +116,12 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12)
-            .copyWith(top: 20),
+            .copyWith(top: 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Centered logo
-            Center(
-              child: Text('Register',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white)),
-            ),
-            SizedBox(
-              height: 5,
-            ),
+            
+            SizedBox(height: 5),
             Text(
               'Create an Account',
               style: TextStyle(
@@ -143,7 +136,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 20),
 
-            // Role Selection Dropdown
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: DropdownButtonFormField<String>(
@@ -167,7 +159,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 12),
 
-            // Organizer-specific fields
             if (selectedRole == 'Organizer')
               Column(
                 children: [
@@ -180,7 +171,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
 
-            // User-specific fields
             if (selectedRole != 'Organizer') ...[
               MyTextField(
                 controller: firstNameController,
@@ -222,7 +212,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 8),
 
-            // Terms and Conditions Checkbox
             Row(
               children: [
                 Padding(
@@ -239,20 +228,18 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text('I agree to terms & Policy.'),
               ],
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 5),
 
-            // Register Button with consistent width
             SizedBox(
-              width: double.infinity, // Full width to match text fields
+              width: double.infinity,
               child: MyButton(
                 onTap: onSubmit,
                 text: "Register",
-                color: navbarColor, // Matching color with navbar
+                color: navbarColor,
               ),
             ),
-            SizedBox(height: 4),
+            
 
-            // Login Option for Existing Users
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -276,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       color: Colors.grey.shade800,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  ),style: TextButton.styleFrom(padding: EdgeInsets.zero),
                 ),
               ],
             ),

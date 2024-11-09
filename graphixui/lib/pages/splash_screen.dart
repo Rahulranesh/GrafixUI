@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
           'assets/logo.png',
           width: 200,
           height: 200,
-          color: Colors.black, // Optional overlay effect for logo
+           // Optional overlay effect for logo
           colorBlendMode: BlendMode.srcATop,
         ),
       ),
