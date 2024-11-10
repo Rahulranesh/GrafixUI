@@ -43,8 +43,7 @@ class _QrScannerState extends State<QrScanner> {
 
     final headers = {
       'Content-Type': 'application/json',
-      'Cookie':
-          'connect.sid=s%3A3WJgbI4XqOvqisTbrrnocQkNHdVYXWgN.gN6Wy6BuGWBRP3BHTlFd5xJFBiixSRnQfoPwC%2BSEnk0', // Use the actual session ID here
+      'Cookie': 'connect.sid=s%3A3WJgbI4XqOvqisTbrrnocQkNHdVYXWgN.gN6Wy6BuGWBRP3BHTlFd5xJFBiixSRnQfoPwC%2BSEnk0',
     };
 
     try {
@@ -54,30 +53,94 @@ class _QrScannerState extends State<QrScanner> {
         body: jsonEncode({'qrCodeData': code}),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        String verificationStatus = data['status'] ?? 'Verification successful';
+        final String verificationMessage = data['message'] ?? 'Verification successful';
 
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ResultScreen(
-              code: verificationStatus,
+              code: verificationMessage,
               closeScreen: closeScreen,
             ),
           ),
         );
       } else {
-        print('Error: ${response.body}');
-        throw Exception('Failed to verify QR code');
+        final errorMessage = jsonDecode(response.body)['message'] ?? 'Verification failed';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $errorMessage')),
+        );
+        setState(() {
+          isScanCompleted = false;
+        });
       }
     } catch (error) {
-      print('Error occurred: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error verifying QR code: $error')),
+      );
+      setState(() {
+        isScanCompleted = false;
+      });
+    }
+  }
+
+  Future<void> getQrCodeData() async {
+    final url = Uri.parse(
+        'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/qrCode');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('QR Code data retrieved successfully!')),
+        );
+        print('QR Code Data: ${data.toString()}');
+      } else {
+        final errorMessage = jsonDecode(response.body)['message'] ?? 'Failed to retrieve QR code data';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $errorMessage')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error retrieving QR code data: $error')),
+      );
+    }
+  }
+
+  Future<void> sendAttachmentFile(String id, String type) async {
+    final url = Uri.parse(
+        'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/attachment');
+
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'id': id, 'type': type});
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Attachment file sent successfully!')),
+        );
+      } else {
+        final errorMessage = jsonDecode(response.body)['message'] ?? 'Failed to send attachment';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $errorMessage')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending attachment file: $error')),
       );
     }
   }
@@ -101,6 +164,14 @@ class _QrScannerState extends State<QrScanner> {
           IconButton(
             icon: const Icon(Icons.camera_alt),
             onPressed: () => cameraController.switchCamera(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.cloud_download),
+            onPressed: getQrCodeData, // Fetch QR code data from the endpoint
+          ),
+          IconButton(
+            icon: const Icon(Icons.attach_file),
+            onPressed: () => sendAttachmentFile('eb025cc812', 'Event'), // Example call for attachment
           ),
         ],
       ),
@@ -146,9 +217,10 @@ class _QrScannerState extends State<QrScanner> {
                         final List<Barcode> barcodes = capture.barcodes;
                         if (!isScanCompleted && barcodes.isNotEmpty) {
                           final String code = barcodes.first.rawValue ?? '---';
-                          isScanCompleted = true;
+                          setState(() {
+                            isScanCompleted = true;
+                          });
 
-                          // Call the verification API
                           verifyQrCode(code);
                         }
                       },
@@ -158,7 +230,7 @@ class _QrScannerState extends State<QrScanner> {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );

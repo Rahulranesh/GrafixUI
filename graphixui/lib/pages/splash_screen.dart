@@ -9,6 +9,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
   @override
   void initState() {
     super.initState();
@@ -30,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     );
 
    return Scaffold(
-  backgroundColor: const Color.fromARGB(255, 8, 5, 61), // Choose a background color that contrasts with your logo text
+  backgroundColor:navbarColor,  // Choose a background color that contrasts with your logo text
   body: Stack(
     children: [
       Container(
