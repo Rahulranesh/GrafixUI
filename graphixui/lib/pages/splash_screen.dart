@@ -18,7 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
       // Navigate to the main page after the delay
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your main page
+        MaterialPageRoute(
+            builder: (context) => LoginPage()), // Replace with your main page
       );
     });
   }
@@ -30,25 +31,26 @@ class _SplashScreenState extends State<SplashScreen> {
       SystemUiOverlayStyle(statusBarColor: Colors.transparent),
     );
 
-   return Scaffold(
-  backgroundColor:navbarColor,  // Choose a background color that contrasts with your logo text
-  body: Stack(
-    children: [
-      Container(
-        color: Colors.grey.shade200, // Set a light background color for contrast
+    return Scaffold(
+      backgroundColor:
+          navbarColor, // Choose a background color that contrasts with your logo text
+      body: Stack(
+        children: [
+          Container(
+            color: Color.fromARGB(
+                255, 8, 5, 61), // Set a light background color for contrast
+          ),
+          Center(
+            child: Image.asset(
+              'assets/logo.png',
+              width: 200,
+              height: 200,
+              // Optional overlay effect for logo
+              colorBlendMode: BlendMode.srcATop,
+            ),
+          ),
+        ],
       ),
-      Center(
-        child: Image.asset(
-          'assets/logo.png',
-          width: 200,
-          height: 200,
-           // Optional overlay effect for logo
-          colorBlendMode: BlendMode.srcATop,
-        ),
-      ),
-    ],
-  ),
-);
-
+    );
   }
 }
