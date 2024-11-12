@@ -17,10 +17,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/splash',
       routes: {
-        '/splash':(context)  => SplashScreen(),
+        '/splash': (context) => SplashScreen(),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
-        '/qr_scanner': (context) => QrScanner(),
+        '/qr_scanner': (context) => PwaScanner(),
       },
     );
   }

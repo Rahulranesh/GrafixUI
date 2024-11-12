@@ -1,237 +1,126 @@
 import 'package:flutter/material.dart';
-import 'package:graphixui/pages/result_screen.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const bgColor = Color(0xfffafafa);
-
-class QrScanner extends StatefulWidget {
-  const QrScanner({super.key});
-
+class PwaScanner extends StatefulWidget {
   @override
-  State<QrScanner> createState() => _QrScannerState();
+  _PwaScannerState createState() => _PwaScannerState();
 }
 
-class _QrScannerState extends State<QrScanner> {
-  bool isScanCompleted = false;
-  bool isTorchOn = false;
-  final MobileScannerController cameraController = MobileScannerController();
+class _PwaScannerState extends State<PwaScanner> {
+  bool showScanner = true;
+  bool showSuccess = false;
+  bool showError = false;
+  Map<String, dynamic>? additionalData;
 
-  void closeScreen() {
-    setState(() {
-      isScanCompleted = false;
-    });
-  }
-
-  @override
-  void dispose() {
-    cameraController.dispose();
-    super.dispose();
-  }
-
-  void toggleTorch() {
-    setState(() {
-      isTorchOn = !isTorchOn;
-      cameraController.toggleTorch();
-    });
-  }
-
-  Future<void> verifyQrCode(String code) async {
-    final url = Uri.parse(
-        'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/verifyQrCode');
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Cookie': 'connect.sid=s%3A3WJgbI4XqOvqisTbrrnocQkNHdVYXWgN.gN6Wy6BuGWBRP3BHTlFd5xJFBiixSRnQfoPwC%2BSEnk0',
-    };
-
-    try {
-      final response = await http.post(
-        url,
-        headers: headers,
-        body: jsonEncode({'qrCodeData': code}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final String verificationMessage = data['message'] ?? 'Verification successful';
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ResultScreen(
-              code: verificationMessage,
-              closeScreen: closeScreen,
-            ),
-          ),
-        );
-      } else {
-        final errorMessage = jsonDecode(response.body)['message'] ?? 'Verification failed';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $errorMessage')),
-        );
-        setState(() {
-          isScanCompleted = false;
-        });
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying QR code: $error')),
-      );
+  void handleScan(BarcodeCapture barcode) {
+    String? qrData =
+        barcode.barcodes.isNotEmpty ? barcode.barcodes.first.rawValue : null;
+    if (qrData != null) {
       setState(() {
-        isScanCompleted = false;
+        showScanner = false;
       });
+      verifyQR(qrData);
     }
   }
 
-  Future<void> getQrCodeData() async {
+  Future<void> verifyQR(String qrData) async {
     final url = Uri.parse(
-        'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/qrCode');
+        "https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/verifyQrCode");
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-      );
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie':
+            'Admin-Signature=ce55f33243', // Only include the Admin-Signature cookie value
+      },
+      body: jsonEncode({'qrCodeData': qrData}),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('QR Code data retrieved successfully!')),
-        );
-        print('QR Code Data: ${data.toString()}');
-      } else {
-        final errorMessage = jsonDecode(response.body)['message'] ?? 'Failed to retrieve QR code data';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $errorMessage')),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error retrieving QR code data: $error')),
-      );
-    }
-  }
-
-  Future<void> sendAttachmentFile(String id, String type) async {
-    final url = Uri.parse(
-        'https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/attachment');
-
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'id': id, 'type': type});
-
-    try {
-      final response = await http.post(
-        url,
-        headers: headers,
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Attachment file sent successfully!')),
-        );
-      } else {
-        final errorMessage = jsonDecode(response.body)['message'] ?? 'Failed to send attachment';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $errorMessage')),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending attachment file: $error')),
-      );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        additionalData = data;
+        showSuccess = true;
+      });
+    } else {
+      print("API Error: ${response.body}");
+      setState(() {
+        showError = true;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("QR SCANNER"),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isTorchOn ? Icons.flash_on : Icons.flash_off,
-              color: isTorchOn ? Colors.yellow : Colors.grey,
-            ),
-            iconSize: 32.0,
-            onPressed: toggleTorch,
-          ),
-          IconButton(
-            icon: const Icon(Icons.camera_alt),
-            onPressed: () => cameraController.switchCamera(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.cloud_download),
-            onPressed: getQrCodeData, // Fetch QR code data from the endpoint
-          ),
-          IconButton(
-            icon: const Icon(Icons.attach_file),
-            onPressed: () => sendAttachmentFile('eb025cc812', 'Event'), // Example call for attachment
-          ),
-        ],
+      appBar: AppBar(title: Text("PWA Scanner")),
+      body: Center(
+        child: showScanner
+            ? MobileScanner(onDetect: handleScan)
+            : showSuccess
+                ? _buildSuccessDialog()
+                : showError
+                    ? _buildErrorDialog()
+                    : Container(),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
-            child: Column(
-              children: const [
-                Text(
-                  "Place the QR code in the area",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Scanning will start automatically",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 250,
-                    height: 250,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey, width: 3),
-                    ),
-                    child: MobileScanner(
-                      controller: cameraController,
-                      onDetect: (capture) {
-                        final List<Barcode> barcodes = capture.barcodes;
-                        if (!isScanCompleted && barcodes.isNotEmpty) {
-                          final String code = barcodes.first.rawValue ?? '---';
-                          setState(() {
-                            isScanCompleted = true;
-                          });
+    );
+  }
 
-                          verifyQrCode(code);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
+  Widget _buildSuccessDialog() {
+    return Dialog(
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 80),
+            SizedBox(height: 20),
+            Text("Access Granted!"),
+            if (additionalData != null) ...[
+              Text("Type Name: ${additionalData!['bookingData']['title']}"),
+              Text("Phone: ${additionalData!['bookingData']['phone']}"),
+              Text(
+                  "Booking ID: ${additionalData!['bookingData']['booking_id']}"),
+            ],
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showScanner = true;
+                  showSuccess = false;
+                });
+              },
+              child: Text("Proceed"),
             ),
-          ),
-          const SizedBox(height: 20),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorDialog() {
+    return Dialog(
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error, color: Colors.red, size: 80),
+            SizedBox(height: 20),
+            Text("Error: QR code not recognized."),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showScanner = true;
+                  showError = false;
+                });
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ),
       ),
     );
   }
