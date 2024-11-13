@@ -17,6 +17,7 @@ dependencies:
   qr_flutter:
   google_sign_in:
   flutter_facebook_auth:
+  fluttertoast:
 
 
 dev_dependencies:

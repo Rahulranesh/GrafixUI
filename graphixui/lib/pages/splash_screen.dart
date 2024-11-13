@@ -9,7 +9,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
+  final Color navbarColor = const Color.fromARGB(255, 8, 5, 61); // Navbar color
+
   @override
   void initState() {
     super.initState();
@@ -30,25 +31,16 @@ class _SplashScreenState extends State<SplashScreen> {
       SystemUiOverlayStyle(statusBarColor: Colors.transparent),
     );
 
-   return Scaffold(
-  backgroundColor:navbarColor,  // Choose a background color that contrasts with your logo text
-  body: Stack(
-    children: [
-      Container(
-        color: Colors.grey.shade200, // Set a light background color for contrast
-      ),
-      Center(
+    return Scaffold(
+      backgroundColor: navbarColor, // Set the background color to navbarColor
+      body: Center(
         child: Image.asset(
           'assets/logo.png',
           width: 200,
           height: 200,
-           // Optional overlay effect for logo
-          colorBlendMode: BlendMode.srcATop,
+          colorBlendMode: BlendMode.srcATop, // Optional overlay effect for logo
         ),
       ),
-    ],
-  ),
-);
-
+    );
   }
 }
