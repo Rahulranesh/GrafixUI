@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
 
 class PwaScanner extends StatefulWidget {
   @override
@@ -15,8 +16,8 @@ class _PwaScannerState extends State<PwaScanner> {
   bool isTorchOn = false;
   Map<String, dynamic>? additionalData;
   final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
-
   final MobileScannerController scannerController = MobileScannerController();
+  final ImagePicker imagePicker = ImagePicker();
 
   void handleScan(BarcodeCapture barcode) {
     String? qrData =
@@ -55,6 +56,29 @@ class _PwaScannerState extends State<PwaScanner> {
     }
   }
 
+  Future<void> verifyImageQR(String imagePath) async {
+    try {
+      // Placeholder: Implement image-based QR code extraction (requires 3rd party library)
+      String extractedQRData = "Sample Extracted QR Data"; // Replace this with actual QR data extraction logic
+      await verifyQR(extractedQRData);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to process image: $e")),
+      );
+    }
+  }
+
+  Future<void> pickImageFromGallery() async {
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      await verifyImageQR(pickedFile.path);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No image selected")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,9 +88,15 @@ class _PwaScannerState extends State<PwaScanner> {
         backgroundColor: navbarColor,
         actions: [
           IconButton(
-            icon: Icon(
-              isTorchOn ? Icons.flash_off : Icons.flash_on,
-              color: Colors.white,
+            icon: AnimatedSwitcher(
+              duration: Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) =>
+                  ScaleTransition(scale: animation, child: child),
+              child: Icon(
+                isTorchOn ? Icons.flash_off : Icons.flash_on,
+                key: ValueKey<bool>(isTorchOn),
+                color: Colors.white,
+              ),
             ),
             onPressed: () {
               setState(() {
@@ -75,186 +105,187 @@ class _PwaScannerState extends State<PwaScanner> {
               scannerController.toggleTorch();
             },
           ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'Get Help') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Help feature is under construction!")),
+                );
+              } else if (value == 'Send QR Feedback') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Feedback feature is under construction!")),
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 'Get Help', child: Text('Get Help')),
+              PopupMenuItem(value: 'Send QR Feedback', child: Text('Send QR Feedback')),
+            ],
+          ),
         ],
       ),
-      body: Center(
-        child: showScanner
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  // Adjusted Logo image with border radius and slight curve
-                  
-                  Container(
-  width: 120,
-  decoration: BoxDecoration(
-    color: navbarColor,
-    borderRadius: BorderRadius.circular(15),
-  ),
-  child: Padding(
-    padding: const EdgeInsets.all(8), // Padding around the logo
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Image.asset(
-          'assets/logo.png',
-        ),
-      ),
-    ),
-  ),
-)
-,
-                  SizedBox(height: 20),
-                  // Instructions
-                  Text(
-                    "Please Scan Your Ticket Here!!",
-                    style: TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                      color: navbarColor,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "Scan in this area!!",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // Scanner container with neumorphism effect
-                  Container(
-                    width: 300,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.deepPurple, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withOpacity(0.6),
-                          offset: Offset(-5, -5),
-                          blurRadius: 15,
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: showScanner
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        Container(
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: navbarColor,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: Image.asset(
+                                  'assets/logo.png',
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          offset: Offset(5, 5),
-                          blurRadius: 15,
+                        SizedBox(height: 20),
+                        Text(
+                          "Please Scan Your Ticket Here!!",
+                          style: TextStyle(
+                            fontSize: 23,
+                            fontWeight: FontWeight.bold,
+                            color: navbarColor,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Stack(
+                          children: [
+                            Container(
+                              width: 300,
+                              height: 300,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.deepPurple, width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.6),
+                                    offset: Offset(-5, -5),
+                                    blurRadius: 15,
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    offset: Offset(5, 5),
+                                    blurRadius: 15,
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: MobileScanner(
+                                  controller: scannerController,
+                                  onDetect: handleScan,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: pickImageFromGallery,
+                          child: Container(
+                            width: 250,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Upload from Gallery",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
+                    )
+                  : showSuccess
+                      ? _buildSuccessDialog()
+                      : showError
+                          ? _buildErrorDialog()
+                          : Container(),
+            ),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.1,
+            minChildSize: 0.1,
+            maxChildSize: 0.3,
+            builder: (context, scrollController) {
+              return Container(
+                color: navbarColor,
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    Center(
+                      child: Icon(Icons.keyboard_arrow_up, color: Colors.white),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: MobileScanner(
-                        controller: scannerController,
-                        onDetect: handleScan,
+                    Center(
+                      child: Text(
+                        "Scan QR Code to Pay!",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            : showSuccess
-                ? _buildSuccessDialog()
-                : showError
-                    ? _buildErrorDialog()
-                    : Container(),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSuccessDialog() {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 80),
-            SizedBox(height: 20),
-            Text(
-              "QR Successfully Completed",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: navbarColor,
-              ),
-            ),
-            SizedBox(height: 10),
-            if (additionalData != null) ...[
-              Text(
-                "Type Name: ${additionalData!['bookingData']['title']}",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-              Text(
-                "Phone: ${additionalData!['bookingData']['phone']}",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-              Text(
-                "Booking ID: ${additionalData!['bookingData']['booking_id']}",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-            ],
-            SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  showScanner = true;
-                  showSuccess = false;
-                });
-              },
-              child: Text("Proceed"),
-            ),
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.check_circle, color: Colors.green, size: 60),
+          SizedBox(height: 10),
+          Text("QR Code successfully verified!"),
+        ],
       ),
     );
   }
 
   Widget _buildErrorDialog() {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error, color: Colors.red, size: 80),
-            SizedBox(height: 20),
-            Text(
-              "Error: QR code not recognized.",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  showScanner = true;
-                  showError = false;
-                });
-              },
-              child: Text("Close"),
-            ),
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error, color: Colors.red, size: 60),
+          SizedBox(height: 10),
+          Text("Error verifying QR Code!"),
+        ],
       ),
     );
   }

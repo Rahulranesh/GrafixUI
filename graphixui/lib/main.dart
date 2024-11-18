@@ -7,12 +7,7 @@ import 'package:graphixui/pages/login_page.dart';
 import 'package:graphixui/pages/qr_scanner.dart';
 import 'package:graphixui/pages/register_page.dart';
 import 'package:graphixui/pages/splash_screen.dart';
-import 'package:graphixui/pages/event/add_event_page.dart';
-import 'package:graphixui/pages/event/update_event_page.dart';
-import 'package:graphixui/pages/event/event_list_page.dart';
-import 'package:graphixui/pages/ticket/ticket_list_page.dart';
-import 'package:graphixui/pages/ticket/add_ticket_page.dart';
-import 'package:graphixui/pages/ticket/update_ticket_page.dart';
+
 import 'package:graphixui/pages/ticket_list_page.dart';
 import 'package:graphixui/pages/update_event_page.dart';
 import 'package:graphixui/pages/update_ticket_page.dart';
@@ -31,7 +26,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/splash',
+      initialRoute: '/qr_scanner',
       routes: {
         '/splash': (context) => SplashScreen(),
         '/login': (context) => LoginPage(),
