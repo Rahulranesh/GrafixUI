@@ -241,30 +241,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                 ),
-                SizedBox(height: 10),
+                
                 // Facebook Login Button
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  child: isLoading
-                      ? CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(navbarColor),
-                        )
-                      : ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.facebook, color: Colors.white),
-                          label: Text(
-                            'Login with Facebook',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: navbarColor,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 15),
-                            minimumSize: Size.fromHeight(50),
-                          ),
-                        ),
-                ),
+                
                 SizedBox(height: 10),
                 Center(
                   child: Row(
