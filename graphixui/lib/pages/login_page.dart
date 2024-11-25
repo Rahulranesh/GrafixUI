@@ -16,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false; // Track loading state
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String selectedRole = 'User';
+  String selectedRole = 'Organizer'; // Default to 'Organizer'
   final ApiService apiService = ApiService();
   final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -33,7 +33,6 @@ class _LoginPageState extends State<LoginPage> {
     if (usernameController.text.isNotEmpty &&
         passwordController.text.isNotEmpty) {
       final roleEndpoints = {
-        'User': '${apiService.baseUrl}/auth/login',
         'Organizer': '${apiService.baseUrl}/auth/org/login',
         'Admin': '${apiService.baseUrl}/admin/login',
       };
@@ -143,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: DropdownButtonFormField<String>(
                     value: selectedRole,
-                    items: <String>['User', 'Organizer', 'Admin']
+                    items: <String>['Organizer', 'Admin'] // Only these roles
                         .map((String role) {
                       return DropdownMenuItem<String>(
                         value: role,
@@ -241,9 +240,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                 ),
-                
+                SizedBox(height: 10),
                 // Facebook Login Button
-                
+
                 SizedBox(height: 10),
                 Center(
                   child: Row(

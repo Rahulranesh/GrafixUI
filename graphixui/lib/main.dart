@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphixui/models/ticket.dart';
-import 'package:graphixui/pages/google.dart';
 
 import 'package:graphixui/pages/login_page.dart';
 import 'package:graphixui/pages/qr_scanner.dart';

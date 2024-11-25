@@ -1,4 +1,3 @@
-// api_service.dart
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -64,7 +63,6 @@ class ApiService {
     String? name,
   }) async {
     final roleEndpoints = {
-      'User': '$baseUrl/auth/register',
       'Organizer': '$baseUrl/auth/org/register',
       'Admin': '$baseUrl/admin/register',
     };
@@ -81,9 +79,9 @@ class ApiService {
 
       // Include the name in the body if the role is Organizer
       if (selectedRole == 'Organizer' && name != null) {
-        body['name'] = name; // Only include the name field
+        body['name'] = name; // Only include the name field for Organizer
       } else {
-        // Include first_name and last_name for User and Admin roles
+        // Include first_name and last_name for Admin role
         body['first_name'] = firstName;
         body['last_name'] = lastName;
       }
