@@ -32,8 +32,7 @@ class _PwaScannerState extends State<PwaScanner> {
 
   Future<void> verifyQR(String qrData) async {
     final url = Uri.parse(
-        "https://mqnmrqvamm.us-east-1.awsapprunner.com/api/bookings/verifyQrCode");
-
+        "https://api.ticketverse.eu/api/bookings/verifyQrCode");
     final response = await http.post(
       url,
       headers: {
@@ -104,23 +103,6 @@ class _PwaScannerState extends State<PwaScanner> {
               });
               scannerController.toggleTorch();
             },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'Get Help') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Help feature is under construction!")),
-                );
-              } else if (value == 'Send QR Feedback') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Feedback feature is under construction!")),
-                );
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'Get Help', child: Text('Get Help')),
-              PopupMenuItem(value: 'Send QR Feedback', child: Text('Send QR Feedback')),
-            ],
           ),
         ],
       ),
@@ -231,33 +213,35 @@ class _PwaScannerState extends State<PwaScanner> {
                           : Container(),
             ),
           ),
-          DraggableScrollableSheet(
-            initialChildSize: 0.1,
-            minChildSize: 0.1,
-            maxChildSize: 0.3,
-            builder: (context, scrollController) {
-              return Container(
-                color: navbarColor,
-                child: ListView(
-                  controller: scrollController,
-                  children: [
-                    Center(
-                      child: Icon(Icons.keyboard_arrow_up, color: Colors.white),
-                    ),
-                    Center(
-                      child: Text(
-                        "Scan QR Code to Pay!",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+          Flexible(
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.1,
+              minChildSize: 0.1,
+              maxChildSize: 0.3,
+              builder: (context, scrollController) {
+                return Container(
+                  color: navbarColor,
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      Center(
+                        child: Icon(Icons.keyboard_arrow_up, color: Colors.white),
+                      ),
+                      Center(
+                        child: Text(
+                          "Scan QR Code to Pay!",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),

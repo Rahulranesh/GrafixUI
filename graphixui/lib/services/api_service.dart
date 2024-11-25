@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class ApiService {
   final String baseUrl =
-      'https://mqnmrqvamm.us-east-1.awsapprunner.com/api'; // Update to your base URL
+      'https://api.ticketverse.eu/api'; // Update to your base URL
   final String baseUrl2 = 'https://mqnmrqvamm.us-east-1.awsapprunner.com';
 
   Future<dynamic> login(
@@ -23,7 +23,7 @@ class ApiService {
 
   Future<dynamic> googleLogin(String token) async {
     final response = await http.post(
-      Uri.parse('$baseUrl2/auth/google'),
+      Uri.parse('$baseUrl/auth/google'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'token': token,
@@ -35,7 +35,7 @@ class ApiService {
 
   Future<dynamic> facebookLogin(String token) async {
     final response = await http.post(
-      Uri.parse('$baseUrl2/auth/facebook'),
+      Uri.parse('$baseUrl/auth/facebook'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'token': token,

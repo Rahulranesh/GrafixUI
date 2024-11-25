@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
 import 'package:graphixui/pages/register_page.dart';
@@ -20,7 +19,9 @@ class _LoginPageState extends State<LoginPage> {
   String selectedRole = 'User';
   final ApiService apiService = ApiService();
   final Color navbarColor = const Color.fromARGB(255, 8, 5, 61);
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'], // Request email scope for Google Sign-In
+  );
 
   void togglePasswordVisibility() {
     setState(() {
@@ -70,8 +71,8 @@ class _LoginPageState extends State<LoginPage> {
       if (googleUser != null) {
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
-        await apiService.googleLogin(googleAuth.idToken!);
-        Navigator.pushNamed(context, '/qr_scanner');
+        await apiService.googleLogin(googleAuth.idToken!); // Send ID Token to API
+        Navigator.pushNamed(context, '/qr_scanner'); // Redirect after login
       }
     } catch (e) {
       _showError("Error during Google login: $e");
