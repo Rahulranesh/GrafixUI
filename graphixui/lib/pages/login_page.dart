@@ -69,10 +69,16 @@ class _LoginPageState extends State<LoginPage> {
 
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-        await apiService.googleLogin(googleAuth.idToken!); // Send ID Token to API
-        Navigator.pushNamed(context, '/qr_scanner'); // Redirect after login
+        // Retrieve user information
+        String? name = googleUser.displayName;
+        String? email = googleUser.email;
+
+        // Debug print user information
+        print("Google User Name: $name");
+        print("Google User Email: $email");
+
+        // Navigate to another page
+        Navigator.pushNamed(context, '/qr_scanner');
       }
     } catch (e) {
       _showError("Error during Google login: $e");
