@@ -32,6 +32,8 @@ flutter:
   assets:
     - assets/logo.png
     - assets/google.jpeg
+    - assets/ticklogo_white.png
+    - assets/Ticklogo_black.png
 
   # Optional custom fonts section:
   # fonts:

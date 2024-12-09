@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
           Center(
             child: Image.asset(
-              'assets/logo.png',
+              'assets/ticklogo_white.png',
               width: 200,
               height: 200,
               // Optional overlay effect for logo

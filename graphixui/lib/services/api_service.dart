@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class ApiService {
   final String baseUrl =
-      'https://api.ticketverse.eu/api'; // Update to your base URL
+      'https://api.ticketverz.com/api'; // Update to your base URL
   final String baseUrl2 = 'https://mqnmrqvamm.us-east-1.awsapprunner.com';
 
   Future<dynamic> login(
