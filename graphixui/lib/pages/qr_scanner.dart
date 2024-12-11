@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
@@ -11,7 +10,8 @@ class PwaScanner extends StatefulWidget {
   _PwaScannerState createState() => _PwaScannerState();
 }
 
-class _PwaScannerState extends State<PwaScanner> with SingleTickerProviderStateMixin {
+class _PwaScannerState extends State<PwaScanner>
+    with SingleTickerProviderStateMixin {
   final MobileScannerController scannerController = MobileScannerController();
   final storage = const FlutterSecureStorage();
 
@@ -31,13 +31,17 @@ class _PwaScannerState extends State<PwaScanner> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _initializeCookie();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _initializeSnowfall();
   }
 
   Future<void> _initializeCookie() async {
-    final signature = await storage.read(key: 'attendee_signature');
+    final signature = await storage.read(key: 'Admin_Signature');
     if (signature == null) {
-      print("No attendee signature found. User not logged in.");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please log in !')),
@@ -47,7 +51,7 @@ class _PwaScannerState extends State<PwaScanner> with SingleTickerProviderStateM
   }
 
   Future<String?> _getCookie() async {
-    return await storage.read(key: "attendee_signature");
+    return await storage.read(key: "Admin_Signature");
   }
 
   void _initializeSnowfall() {
@@ -92,10 +96,11 @@ class _PwaScannerState extends State<PwaScanner> with SingleTickerProviderStateM
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': 'Attendee-Signature=$signature',
+        'Cookie': 'Admin-Signature=$signature',
       },
       body: jsonEncode({'qrCodeData': qrData}),
     );
+    print(qrData);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -216,7 +221,8 @@ class _PwaScannerState extends State<PwaScanner> with SingleTickerProviderStateM
         SizedBox(height: 30),
         Card(
           elevation: 10,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Container(
             width: 300,
             height: 300,

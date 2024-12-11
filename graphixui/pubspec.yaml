@@ -15,7 +15,7 @@ dependencies:
   google_fonts: ^6.2.1
   mobile_scanner:
   qr_flutter:
-  google_sign_in:
+  google_sign_in: ^6.2.2
   flutter_facebook_auth:
   fluttertoast:
   image_picker:
