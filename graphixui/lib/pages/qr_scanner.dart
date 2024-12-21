@@ -3,15 +3,13 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:math';
 
 class PwaScanner extends StatefulWidget {
   @override
   _PwaScannerState createState() => _PwaScannerState();
 }
 
-class _PwaScannerState extends State<PwaScanner>
-    with SingleTickerProviderStateMixin {
+class _PwaScannerState extends State<PwaScanner> {
   final MobileScannerController scannerController = MobileScannerController();
   final storage = const FlutterSecureStorage();
 
@@ -23,50 +21,23 @@ class _PwaScannerState extends State<PwaScanner>
 
   final Color primaryColor = const Color.fromARGB(255, 8, 5, 61);
 
-  // For snow animation
-  late AnimationController _animationController;
-  late List<Snowflake> _snowflakes;
-
   @override
   void initState() {
     super.initState();
     _initializeCookie();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _initializeSnowfall();
-  }
-
   Future<void> _initializeCookie() async {
     final signature = await storage.read(key: 'Admin_Signature');
-    if (signature == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please log in !')),
-        );
-      }
+    if (signature == null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in!')),
+      );
     }
   }
 
   Future<String?> _getCookie() async {
     return await storage.read(key: "Admin_Signature");
-  }
-
-  void _initializeSnowfall() {
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 10),
-      vsync: this,
-    )..repeat();
-    _snowflakes = List.generate(
-      100,
-      (index) => Snowflake(
-        Random().nextDouble() * MediaQuery.of(context).size.width,
-        Random().nextDouble() * MediaQuery.of(context).size.height,
-        Random().nextDouble() * 2 + 1,
-      ),
-    );
   }
 
   void handleScan(BarcodeCapture barcode) {
@@ -82,6 +53,7 @@ class _PwaScannerState extends State<PwaScanner>
 
   Future<void> verifyQR(String qrData) async {
     final signature = await _getCookie();
+    // Retrieve stored event ID
 
     if (signature == null) {
       setState(() {
@@ -92,31 +64,39 @@ class _PwaScannerState extends State<PwaScanner>
 
     final url =
         Uri.parse("https://api.ticketverz.com/api/bookings/verifyQrCode");
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': 'Admin-Signature=$signature',
-      },
-      body: jsonEncode({'qrCodeData': qrData}),
-    );
-    print(qrData);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['valid'] == true) {
-        setState(() {
-          additionalData = data['bookingData'];
-          showSuccess = true;
-          showError = false;
-        });
-      } else {
-        setState(() {
-          showError = true;
-          showSuccess = false;
-        });
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': 'Admin-Signature=$signature',
+        },
+        body: jsonEncode({
+          'qrCodeData': qrData,
+        }),
+      );
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['valid'] == true) {
+          setState(() {
+            additionalData = data['bookingData']; // Store booking data
+            showSuccess = true;
+            showError = false;
+          });
+        } else {
+          setState(() {
+            showError = true;
+            showSuccess = false;
+          });
+        }
       }
-    } else {
+    } catch (e) {
+      print("Error: $e");
       setState(() {
         showError = true;
         showSuccess = false;
@@ -138,7 +118,6 @@ class _PwaScannerState extends State<PwaScanner>
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient Background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -148,25 +127,13 @@ class _PwaScannerState extends State<PwaScanner>
               ),
             ),
           ),
-
-          // Snow Animation
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return CustomPaint(
-                painter: SnowPainter(_snowflakes, _animationController.value),
-              );
-            },
-          ),
-
-          // Main Content
           Column(
             children: [
               AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 centerTitle: true,
-                title: Text(
+                title: const Text(
                   "QR Code Scanner",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -210,7 +177,7 @@ class _PwaScannerState extends State<PwaScanner>
   Widget _buildScannerUI() {
     return Column(
       children: [
-        Text(
+        const Text(
           "Please Scan Your Ticket Below",
           style: TextStyle(
             fontSize: 22,
@@ -218,12 +185,12 @@ class _PwaScannerState extends State<PwaScanner>
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 30),
+        const SizedBox(height: 30),
         Card(
           elevation: 10,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Container(
+          child: SizedBox(
             width: 300,
             height: 300,
             child: MobileScanner(
@@ -232,57 +199,39 @@ class _PwaScannerState extends State<PwaScanner>
             ),
           ),
         ),
-        SizedBox(height: 20),
-        Text(
-          "Align the QR Code within the frame",
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 16,
-          ),
-        ),
       ],
     );
   }
 
   Widget _buildSuccessDialog() {
-    if (additionalData == null) return Container();
-
-    return Card(
-      elevation: 10,
-      margin: EdgeInsets.symmetric(horizontal: 20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 60),
-            SizedBox(height: 10),
-            Text(
-              "QR Code Verified Successfully!",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Event: ${additionalData?['title'] ?? 'N/A'}",
-              style: TextStyle(fontSize: 16),
-            ),
-            Text(
-              "Date: ${additionalData?['start_date_time'] ?? 'N/A'}",
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: resetScanner,
-              child: Text("Scan Another Ticket"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-              ),
-            ),
-          ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.check_circle, color: Colors.green, size: 60),
+        const SizedBox(height: 10),
+        const Text(
+          "Access Granted!",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-      ),
+        if (additionalData != null) ...[
+          const SizedBox(height: 10),
+          Text(
+            "Event: ${additionalData!['title']}",
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            "Date: ${additionalData!['start_date_time']}",
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: resetScanner,
+          child: const Text("Scan Another"),
+          style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+        ),
+      ],
     );
   }
 
@@ -290,56 +239,19 @@ class _PwaScannerState extends State<PwaScanner>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.error, color: Colors.red, size: 60),
-        SizedBox(height: 10),
-        Text(
+        const Icon(Icons.error, color: Colors.red, size: 60),
+        const SizedBox(height: 10),
+        const Text(
           "Error verifying QR Code!",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: resetScanner,
-          child: Text("Try Again"),
+          child: const Text("Try Again"),
           style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
         ),
       ],
     );
-  }
-}
-
-class Snowflake {
-  double x, y, speed;
-
-  Snowflake(this.x, this.y, this.speed);
-
-  void update(double value, double height) {
-    y += speed * value * 200;
-    if (y > height) {
-      y = -10;
-    }
-  }
-}
-
-class SnowPainter extends CustomPainter {
-  final List<Snowflake> snowflakes;
-  final double value;
-
-  SnowPainter(this.snowflakes, this.value);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    for (var snowflake in snowflakes) {
-      canvas.drawCircle(Offset(snowflake.x, snowflake.y), 3, paint);
-      snowflake.update(value, size.height);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }
