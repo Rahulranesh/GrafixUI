@@ -19,7 +19,8 @@ class _PwaScannerState extends State<PwaScanner> {
   bool isTorchOn = false;
   Map<String, dynamic>? additionalData;
 
-  final Color primaryColor = const Color.fromARGB(255, 8, 5, 61);
+  final Color primaryColor = const Color(0xFF283593);
+  List<Map<String, dynamic>> scanHistory = [];
 
   @override
   void initState() {
@@ -53,7 +54,6 @@ class _PwaScannerState extends State<PwaScanner> {
 
   Future<void> verifyQR(String qrData) async {
     final signature = await _getCookie();
-    // Retrieve stored event ID
 
     if (signature == null) {
       setState(() {
@@ -77,29 +77,40 @@ class _PwaScannerState extends State<PwaScanner> {
         }),
       );
 
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['valid'] == true) {
           setState(() {
-            additionalData = data['bookingData']; // Store booking data
+            additionalData = data['bookingData'];
             showSuccess = true;
             showError = false;
+            scanHistory.add({
+              'qrData': qrData,
+              'status': 'Success',
+              'details': additionalData,
+            });
           });
         } else {
           setState(() {
             showError = true;
             showSuccess = false;
+            scanHistory.add({
+              'qrData': qrData,
+              'status': 'Error',
+              'details': null,
+            });
           });
         }
       }
     } catch (e) {
-      print("Error: $e");
       setState(() {
         showError = true;
         showSuccess = false;
+        scanHistory.add({
+          'qrData': qrData,
+          'status': 'Error',
+          'details': null,
+        });
       });
     }
   }
@@ -119,9 +130,9 @@ class _PwaScannerState extends State<PwaScanner> {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.deepPurpleAccent, Colors.purple.shade900],
+                colors: [Color.fromARGB(255, 93, 155, 196), Colors.grey],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -137,7 +148,7 @@ class _PwaScannerState extends State<PwaScanner> {
                   "QR Code Scanner",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    fontSize: 22,
                     color: Colors.white,
                   ),
                 ),
@@ -152,6 +163,20 @@ class _PwaScannerState extends State<PwaScanner> {
                         isTorchOn = !isTorchOn;
                       });
                       scannerController.toggleTorch();
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.history,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScanHistoryPage(scanHistory),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -187,12 +212,13 @@ class _PwaScannerState extends State<PwaScanner> {
         ),
         const SizedBox(height: 30),
         Card(
-          elevation: 10,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 15,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
           child: SizedBox(
-            width: 300,
-            height: 300,
+            width: 320,
+            height: 320,
             child: MobileScanner(
               controller: scannerController,
               onDetect: handleScan,
@@ -207,29 +233,34 @@ class _PwaScannerState extends State<PwaScanner> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.check_circle, color: Colors.green, size: 60),
+        const Icon(Icons.check_circle, color: Colors.green, size: 80),
         const SizedBox(height: 10),
         const Text(
           "Access Granted!",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         if (additionalData != null) ...[
           const SizedBox(height: 10),
           Text(
             "Event: ${additionalData!['title']}",
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 5),
           Text(
-            "Date: ${additionalData!['start_date_time']}",
-            style: const TextStyle(fontSize: 16),
+            "Booking ID: ${additionalData!['booking_id']}",
+            style: const TextStyle(fontSize: 18),
           ),
         ],
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: resetScanner,
           child: const Text("Scan Another"),
-          style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
         ),
       ],
     );
@@ -239,19 +270,89 @@ class _PwaScannerState extends State<PwaScanner> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.error, color: Colors.red, size: 60),
+        const Icon(Icons.error, color: Colors.red, size: 80),
         const SizedBox(height: 10),
         const Text(
           "Error verifying QR Code!",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: resetScanner,
           child: const Text("Try Again"),
-          style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
         ),
       ],
+    );
+  }
+}
+
+class ScanHistoryPage extends StatelessWidget {
+  final List<Map<String, dynamic>> scanHistory;
+
+  ScanHistoryPage(this.scanHistory);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Scan History"),
+        backgroundColor: Colors.white,
+      ),
+      body: scanHistory.isEmpty
+          ? const Center(
+              child: Text(
+                "No scan history yet.",
+                style: TextStyle(fontSize: 18),
+              ),
+            )
+          : ListView.builder(
+              itemCount: scanHistory.length,
+              itemBuilder: (context, index) {
+                final item = scanHistory[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: ListTile(
+                    leading: Icon(
+                      item['status'] == 'Success'
+                          ? Icons.check_circle
+                          : Icons.error,
+                      color: item['status'] == 'Success'
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                    title: Text("QR Data: ${item['qrData']}"),
+                    subtitle: Text("Status: ${item['status']}"),
+                    trailing: item['details'] != null
+                        ? IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text("QR Details"),
+                                  content: Text(
+                                      "Event: ${item['details']['title']}\nBooking ID: ${item['details']['booking_id']}"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Close"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          )
+                        : null,
+                  ),
+                );
+              },
+            ),
     );
   }
 }
