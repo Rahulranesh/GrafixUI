@@ -19,6 +19,7 @@ dependencies:
   flutter_facebook_auth:
   fluttertoast:
   image_picker:
+  provider: ^6.1.2
 
 
 dev_dependencies:

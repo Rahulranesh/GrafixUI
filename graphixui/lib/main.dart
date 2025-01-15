@@ -6,9 +6,16 @@ import 'package:graphixui/pages/login_page.dart';
 import 'package:graphixui/pages/qr_scanner.dart';
 import 'package:graphixui/pages/register_page.dart';
 import 'package:graphixui/pages/splash_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) =>
+          PwaScannerProvider(), // Providing PwaScannerProvider at root level
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
