@@ -114,7 +114,7 @@ class PwaScanner extends ConsumerWidget {
             child: Column(
               children: [
                 AppBar(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: const Color.fromARGB(255, 8, 1, 44),
                   elevation: 0,
                   centerTitle: true,
                   title: const Text(
@@ -175,7 +175,10 @@ class PwaScanner extends ConsumerWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color.fromARGB(255, 93, 155, 196), Colors.grey],
+          colors: [
+            Colors.white,
+            Colors.grey,
+          ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -193,7 +196,7 @@ class PwaScanner extends ConsumerWidget {
             "Please Scan Your Ticket Below",
             style: TextStyle(
               fontSize: 22,
-              color: Colors.white,
+              color: Colors.black,
               fontWeight: FontWeight.w600,
             ),
           ),
