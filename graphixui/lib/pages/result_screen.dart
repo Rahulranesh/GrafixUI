@@ -14,20 +14,28 @@ class ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Extract booking data for convenience
+    final bookingData = data['bookingData'] ?? {};
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isSuccess ? "Success" : "Error"),
-        backgroundColor: isSuccess ? Colors.green : Colors.red,
-      ),
       body: Center(
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isSuccess ? Colors.green[50] : Colors.red[50],
+            color: Colors.white,
             borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 3,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 isSuccess ? Icons.check_circle : Icons.error,
@@ -37,30 +45,78 @@ class ResultPage extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 isSuccess ? "Access Granted!" : "Access Denied!",
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: isSuccess ? Colors.green : Colors.red,
                 ),
               ),
-              if (isSuccess) ...[
-                const SizedBox(height: 10),
-                Text(
-                  "Event: ${data['title']}",
-                  style: const TextStyle(fontSize: 18),
+              const SizedBox(height: 15),
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      "Event Title:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      bookingData['title'] ?? "N/A",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 10),
+                    // Booking ID
+                    Text(
+                      "Booking ID:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      bookingData['booking_id'] ?? "N/A",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 10),
+                    // Quantity
+                    Text(
+                      "Quantity:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      bookingData['quantity']?.toString() ?? "N/A",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
-                Text(
-                  "Booking ID: ${data['booking_id']}",
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ],
+              ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: () {
                   onBack();
                   Navigator.pop(context);
                 },
-                icon: const Icon(Icons.arrow_back),
-                label: const Text("Back to Scanner"),
+                label: const Text("Scan Again"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSuccess ? Colors.blue : Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                ),
               ),
             ],
           ),

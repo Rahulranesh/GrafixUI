@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final scanHistoryProvider =
+    StateNotifierProvider<ScanHistoryNotifier, List<Map<String, dynamic>>>(
+  (ref) => ScanHistoryNotifier(),
+);
+
+class ScanHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
+  ScanHistoryNotifier() : super([]);
+
+  void addScanRecord(Map<String, dynamic> record) {
+    state = [...state, record];
+  }
+
+  void clearHistory() {
+    state = [];
+  }
+
+  void deleteRecord(int index) {
+    state = [...state]..removeAt(index); // Removes item at the given index
+  }
+}
+
 class ScanHistoryPage extends ConsumerWidget {
   const ScanHistoryPage({Key? key}) : super(key: key);
 
@@ -10,8 +31,21 @@ class ScanHistoryPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Scan History"),
-        backgroundColor: Colors.blueAccent,
+        title: Text(
+          "Scan History (${scanHistory.length})", // Display the count
+          style: const TextStyle(fontSize: 20),
+        ),
+        backgroundColor: Colors.white,
+        actions: [
+          if (scanHistory.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                ref.read(scanHistoryProvider.notifier).clearHistory();
+              },
+              tooltip: "Clear All History",
+            ),
+        ],
       ),
       body: scanHistory.isEmpty
           ? const Center(
@@ -24,7 +58,11 @@ class ScanHistoryPage extends ConsumerWidget {
               itemCount: scanHistory.length,
               itemBuilder: (context, index) {
                 final item = scanHistory[index];
+                final movieTitle =
+                    item['details']?['title'] ?? 'Unknown Title'; // Movie title
+
                 return Card(
+                  color: const Color.fromARGB(255, 16, 141, 180),
                   margin:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
@@ -36,10 +74,13 @@ class ScanHistoryPage extends ConsumerWidget {
                           ? Colors.green
                           : Colors.red,
                     ),
-                    title: Text("QR Data: ${item['qrData']}"),
+                    title: Text(movieTitle), // Display movie title
                     subtitle: Text("Status: ${item['status']}"),
-                    trailing: item['details'] != null
-                        ? IconButton(
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (item['details'] != null)
+                          IconButton(
                             icon: const Icon(Icons.info_outline),
                             onPressed: () {
                               showDialog(
@@ -47,7 +88,8 @@ class ScanHistoryPage extends ConsumerWidget {
                                 builder: (context) => AlertDialog(
                                   title: const Text("QR Details"),
                                   content: Text(
-                                      "Event: ${item['details']['title']}\nBooking ID: ${item['details']['booking_id']}"),
+                                    "Event: ${movieTitle}\nBooking ID: ${item['details']['booking_id']}",
+                                  ),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -57,33 +99,21 @@ class ScanHistoryPage extends ConsumerWidget {
                                 ),
                               );
                             },
-                          )
-                        : null,
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            ref
+                                .read(scanHistoryProvider.notifier)
+                                .deleteRecord(index);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
             ),
     );
-  }
-}
-
-// A provider for managing scan history
-final scanHistoryProvider =
-    StateNotifierProvider<ScanHistoryNotifier, List<Map<String, dynamic>>>(
-  (ref) => ScanHistoryNotifier(),
-);
-
-/// StateNotifier for managing the scan history
-class ScanHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
-  ScanHistoryNotifier() : super([]);
-
-  /// Adds a new scan record to the history
-  void addScanRecord(Map<String, dynamic> record) {
-    state = [...state, record];
-  }
-
-  /// Clears the entire scan history
-  void clearHistory() {
-    state = [];
   }
 }

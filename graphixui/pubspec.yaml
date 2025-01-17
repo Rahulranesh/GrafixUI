@@ -21,6 +21,7 @@ dependencies:
   image_picker:
   provider: ^6.1.2
   flutter_riverpod: ^2.6.1
+  image: ^4.5.2
 
 
 dev_dependencies:
