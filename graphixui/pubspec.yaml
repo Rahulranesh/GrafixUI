@@ -20,6 +20,7 @@ dependencies:
   fluttertoast:
   image_picker:
   provider: ^6.1.2
+  flutter_riverpod: ^2.6.1
 
 
 dev_dependencies:

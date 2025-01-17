@@ -1,107 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
+class ResultPage extends StatelessWidget {
+  final bool isSuccess;
+  final Map<String, dynamic> data;
+  final VoidCallback onBack;
 
-const bgColor = Color(0xfffafafa);
-
-class ResultScreen extends StatelessWidget {
-  final String code;
-  final Function() closeScreen;
-
-  const ResultScreen({
-    super.key,
-    required this.code,
-    required this.closeScreen,
-  });
+  const ResultPage({
+    required this.isSuccess,
+    required this.data,
+    required this.onBack,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
       appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              closeScreen();
-              Navigator.pop(context);
-            },
-            icon: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.black54,
-            )),
-        centerTitle: true,
-        title: const Text(
-          "QR SCANNER",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
+        title: Text(isSuccess ? "Success" : "Error"),
+        backgroundColor: isSuccess ? Colors.green : Colors.red,
       ),
-      body: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 200,
-              width: 200,
-              child: CustomPaint(
-                painter: QrPainter(
-                  data: code,
-                  version: QrVersions.auto,
-                  gapless: false,
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isSuccess ? Colors.green[50] : Colors.red[50],
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle : Icons.error,
+                color: isSuccess ? Colors.green : Colors.red,
+                size: 80,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                isSuccess ? "Access Granted!" : "Access Denied!",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Scanned result",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              code,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: MediaQuery.of(context).size.width - 100,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+              if (isSuccess) ...[
+                const SizedBox(height: 10),
+                Text(
+                  "Event: ${data['title']}",
+                  style: const TextStyle(fontSize: 18),
                 ),
+                Text(
+                  "Booking ID: ${data['booking_id']}",
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ],
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: code));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copied to clipboard!')),
-                  );
+                  onBack();
+                  Navigator.pop(context);
                 },
-                child: const Text(
-                  "Copy",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                    letterSpacing: 1,
-                  ),
-                ),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text("Back to Scanner"),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
