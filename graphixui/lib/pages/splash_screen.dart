@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphixui/pages/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // Replace with your main app page
 
 class SplashScreen extends StatefulWidget {
@@ -15,13 +16,15 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Delay for the splash screen
-    Future.delayed(Duration(seconds: 3), () {
-      // Navigate to the main page after the delay
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LoginPage()), // Replace with your main page
-      );
+    Future.delayed(Duration(seconds: 2), () async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+      if (isLoggedIn) {
+        Navigator.pushReplacementNamed(context, '/qr_scanner');
+      } else {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     });
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:graphixui/pages/result_screen.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'scan_historypage.dart';
 
@@ -14,9 +16,8 @@ class PwaScannerNotifier extends ChangeNotifier {
 
   bool showScanner = true;
   bool isTorchOn = false;
-  bool isLoading = false;
+  bool isLoading = false; // New flag to prevent duplicate scans
   Map<String, dynamic>? additionalData;
-  bool showResult = false;
 
   PwaScannerNotifier(this.ref);
 
@@ -33,12 +34,18 @@ class PwaScannerNotifier extends ChangeNotifier {
   }
 
   void handleScan(BarcodeCapture barcode, BuildContext context) {
+    // Ensure only one scan is processed at a time
+    if (isLoading) return;
+
+    // Get the scanned data
     String? qrData =
         barcode.barcodes.isNotEmpty ? barcode.barcodes.first.rawValue : null;
 
-    if (qrData != null && !isLoading) {
-      isLoading = true;
+    if (qrData != null) {
+      isLoading = true; // Block further scans
       notifyListeners();
+
+      // Process the QR code data
       verifyQR(qrData, context);
     }
   }
@@ -64,8 +71,18 @@ class PwaScannerNotifier extends ChangeNotifier {
           'details': additionalData,
         });
 
-        showResult = true;
-        notifyListeners();
+        _navigateToResultPage(
+          context,
+          ResultPage(
+            isSuccess: data['valid'] == true,
+            data: {
+              'qrData': qrData,
+              'status': data['valid'] == true ? 'Valid' : 'Invalid',
+              'details': additionalData,
+            },
+            onBack: resetScanner,
+          ),
+        );
       } else {
         ref.read(scanHistoryProvider.notifier).addScanRecord({
           'qrData': qrData,
@@ -73,8 +90,14 @@ class PwaScannerNotifier extends ChangeNotifier {
           'details': null,
         });
 
-        showResult = true;
-        notifyListeners();
+        _navigateToResultPage(
+          context,
+          ResultPage(
+            isSuccess: false,
+            data: {'qrData': qrData, 'status': 'Error', 'details': null},
+            onBack: resetScanner,
+          ),
+        );
       }
     } catch (e) {
       debugPrint("Exception occurred: $e");
@@ -84,19 +107,44 @@ class PwaScannerNotifier extends ChangeNotifier {
         'details': null,
       });
 
-      showResult = true;
-      notifyListeners();
-    } finally {
-      isLoading = false;
-      notifyListeners();
+      _navigateToResultPage(
+        context,
+        ResultPage(
+          isSuccess: false,
+          data: {'qrData': qrData, 'status': 'Error', 'details': null},
+          onBack: resetScanner,
+        ),
+      );
     }
+  }
+
+  void _navigateToResultPage(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0); // Slide in from the right
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          final tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+      ),
+    ).then((_) => resetScanner()); // Reset scanner on returning to the scanner
   }
 
   void resetScanner() {
     showScanner = true;
     additionalData = null;
-    isLoading = false;
-    showResult = false;
+    isLoading = false; // Allow new scans
     notifyListeners();
   }
 }
@@ -104,65 +152,94 @@ class PwaScannerNotifier extends ChangeNotifier {
 class PwaScanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    Future<void> checkAuth() async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+      if (!isLoggedIn) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    }
+
+    checkAuth();
     final provider = ref.watch(pwaScannerProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 14, 1, 63),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          "QR Code Scanner",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: Icon(
+              provider.isTorchOn ? Icons.flash_off : Icons.flash_on,
+              color: Colors.white,
+            ),
+            onPressed: provider.toggleTorch,
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 14, 1, 63),
+              ),
+              child: Center(
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Scan History'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ScanHistoryPage(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('isLoggedIn', false);
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+          ],
+        ),
+      ),
       body: Stack(
         children: [
           _buildBackground(),
           SingleChildScrollView(
             child: Column(
               children: [
-                AppBar(
-                  backgroundColor: const Color.fromARGB(255, 8, 1, 44),
-                  elevation: 0,
-                  centerTitle: true,
-                  title: const Text(
-                    "QR Code Scanner",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      color: Colors.white,
-                    ),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(
-                        provider.isTorchOn ? Icons.flash_off : Icons.flash_on,
-                        color: Colors.white,
-                      ),
-                      onPressed: provider.toggleTorch,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.history, color: Colors.white),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ScanHistoryPage(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 20),
                 provider.showScanner
                     ? _buildScannerUI(provider, context)
                     : Container(),
-                // Smooth transition for result popup
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  bottom: provider.showResult
-                      ? 100
-                      : -250, // Position result popup below scanner
-                  left: 20,
-                  right: 20,
-                  child: provider.showResult
-                      ? _buildResultPopup(provider)
-                      : Container(),
-                ),
               ],
             ),
           ),
@@ -175,10 +252,7 @@ class PwaScanner extends ConsumerWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.white,
-            Colors.grey,
-          ],
+          colors: [Color.fromARGB(255, 227, 228, 230), Colors.grey],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -191,7 +265,7 @@ class PwaScanner extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         children: [
-          const SizedBox(height: 10),
+          const SizedBox(height: 30),
           const Text(
             "Please Scan Your Ticket Below",
             style: TextStyle(
@@ -200,109 +274,22 @@ class PwaScanner extends ConsumerWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 10),
-          AnimatedOpacity(
-            opacity: provider.isLoading ? 0.5 : 1.0,
-            duration: const Duration(milliseconds: 300),
-            child: Card(
-              elevation: 15,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
+          const SizedBox(height: 30),
+          Card(
+            elevation: 15,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.width * 0.9,
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: MediaQuery.of(context).size.width * 0.8,
                 child: MobileScanner(
                   controller: provider.scannerController,
                   onDetect: (barcode) => provider.handleScan(barcode, context),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultPopup(PwaScannerNotifier provider) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      elevation: 10,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              provider.additionalData != null
-                  ? Icons.check_circle
-                  : Icons.error,
-              color:
-                  provider.additionalData != null ? Colors.green : Colors.red,
-              size: 80,
-            ),
-            const SizedBox(height: 15),
-            Text(
-              provider.additionalData != null
-                  ? "Access Granted!"
-                  : "Access Denied!",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color:
-                    provider.additionalData != null ? Colors.green : Colors.red,
-              ),
-            ),
-            const SizedBox(height: 15),
-            if (provider.additionalData != null) ...[
-              _buildDetailRow("Booking ID:",
-                  provider.additionalData!['booking_id']?.toString() ?? "N/A"),
-              _buildDetailRow("Quantity: ",
-                  provider.additionalData!['quantity']?.toString() ?? "N/A"),
-            ],
-            const SizedBox(height: 15),
-            ElevatedButton.icon(
-              onPressed: () {
-                provider.resetScanner();
-              },
-              label: const Text("Scan Again"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 16),
             ),
           ),
         ],

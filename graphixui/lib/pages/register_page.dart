@@ -98,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-       appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: navbarColor,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -120,7 +120,6 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            
             SizedBox(height: 5),
             Text(
               'Create an Account',
@@ -135,7 +134,6 @@ class _RegisterPageState extends State<RegisterPage> {
               style: TextStyle(color: Colors.grey.shade600),
             ),
             SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: DropdownButtonFormField<String>(
@@ -158,7 +156,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             SizedBox(height: 12),
-
             if (selectedRole == 'Organizer')
               Column(
                 children: [
@@ -170,7 +167,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 16),
                 ],
               ),
-
             if (selectedRole != 'Organizer') ...[
               MyTextField(
                 controller: firstNameController,
@@ -185,7 +181,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 16),
             ],
-
             MyTextField(
               controller: usernameController,
               hintText: "Username",
@@ -211,7 +206,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             SizedBox(height: 8),
-
             Row(
               children: [
                 Padding(
@@ -229,7 +223,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ],
             ),
             SizedBox(height: 5),
-
             SizedBox(
               width: double.infinity,
               child: MyButton(
@@ -238,8 +231,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 color: navbarColor,
               ),
             ),
-            
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -263,7 +254,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       color: Colors.grey.shade800,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  ),
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
                 ),
               ],
             ),

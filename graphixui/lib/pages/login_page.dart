@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphixui/components/my_button.dart';
 import 'package:graphixui/components/my_textfield.dart';
+import 'package:graphixui/pages/qr_scanner.dart';
 import 'package:graphixui/pages/register_page.dart';
 import 'package:graphixui/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -37,55 +39,56 @@ class _LoginPageState extends State<LoginPage> {
         'Admin': '${apiService.baseUrl}/admin/login',
       };
 
-      setState(() {
-        isLoading = true; // Show loading spinner
-      });
-
       try {
         await apiService.login(
           usernameController.text,
           passwordController.text,
           roleEndpoints[selectedRole]!,
         );
-        Navigator.pushNamed(context, '/qr_scanner');
+
+        await saveSession(); // Save session after successful login
+
+        // Smooth transition to the scanner page
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                PwaScanner(), // Replace with your scanner page widget
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+
+              var tween =
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+          ),
+        );
       } catch (e) {
         _showError("Login failed: $e");
-      } finally {
-        setState(() {
-          isLoading = false; // Hide loading spinner
-        });
       }
     } else {
       _showError("Please fill all the fields");
     }
   }
 
-  Future<void> _handleGoogleLogin() async {
-    try {
-      setState(() {
-        isLoading = true; // Show loading spinner
-      });
+  Future<void> saveSession() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true); // Save login state
+    await prefs.setString('username', usernameController.text); // Save username
+  }
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser != null) {
-        // Retrieve user information
-        String? name = googleUser.displayName;
-        String? email = googleUser.email;
-
-        // Debug print user information
-        print("Google User Name: $name");
-        print("Google User Email: $email");
-
-        // Navigate to another page
-        Navigator.pushNamed(context, '/qr_scanner');
-      }
-    } catch (e) {
-      _showError("Error during Google login: $e");
-    } finally {
-      setState(() {
-        isLoading = false; // Hide loading spinner
-      });
-    }
+  Future<void> logout(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all saved data
+    Navigator.pushReplacementNamed(context, '/login'); // Redirect to login page
   }
 
   void _showError(String message) {
@@ -130,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 5),
             Text(
-              'Make your events visible by ticketverse',
+              'Make your events visible by ticketverz',
               style: TextStyle(color: Colors.grey.shade600),
             ),
             SizedBox(height: 14),
@@ -208,40 +211,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                 ),
-                SizedBox(height: 16),
-                // Google Login Button
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  child: isLoading
-                      ? CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(navbarColor),
-                        )
-                      : ElevatedButton.icon(
-                          onPressed: _handleGoogleLogin,
-                          icon: ClipRRect(
-                            borderRadius: BorderRadius.circular(25),
-                            child: Image.asset(
-                              'assets/google.jpeg',
-                              height: 20,
-                              width: 20,
-                            ),
-                          ),
-                          label: Text(
-                            'Login with Google',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: navbarColor,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 15),
-                            minimumSize: Size.fromHeight(50),
-                          ),
-                        ),
-                ),
-                SizedBox(height: 10),
-                // Facebook Login Button
-
                 SizedBox(height: 10),
                 Center(
                   child: Row(

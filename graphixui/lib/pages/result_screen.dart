@@ -86,6 +86,23 @@ class ResultPage extends StatelessWidget {
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 10),
+                    Text(
+                      "Name:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      bookingData['first_name'] ?? "N/A",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    Text(
+                      bookingData['last_name'] ?? "N/A",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 10),
                     // Quantity
                     Text(
                       "Quantity:",

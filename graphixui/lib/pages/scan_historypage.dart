@@ -33,9 +33,10 @@ class ScanHistoryPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           "Scan History (${scanHistory.length})", // Display the count
-          style: const TextStyle(fontSize: 20),
+          style: const TextStyle(fontSize: 20, color: Colors.white),
         ),
-        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: const Color.fromARGB(255, 14, 1, 63),
         actions: [
           if (scanHistory.isNotEmpty)
             IconButton(
@@ -62,7 +63,7 @@ class ScanHistoryPage extends ConsumerWidget {
                     item['details']?['title'] ?? 'Unknown Title'; // Movie title
 
                 return Card(
-                  color: const Color.fromARGB(255, 16, 141, 180),
+                  color: const Color.fromARGB(255, 162, 170, 172),
                   margin:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
