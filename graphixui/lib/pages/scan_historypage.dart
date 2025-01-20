@@ -89,7 +89,7 @@ class ScanHistoryPage extends ConsumerWidget {
                                 builder: (context) => AlertDialog(
                                   title: const Text("QR Details"),
                                   content: Text(
-                                    "Event: ${movieTitle}\nBooking ID: ${item['details']['booking_id']}\nQuantity:${item['details']['quantity']}",
+                                    "Event: ${movieTitle}\nBooking ID: ${item['details']['booking_id']}\nFirst Name: ${item['details']['first_name']}\nLast Name: ${item['details']['last_name']}\nEmail: ${item['details']['email']}\nEvent date: ${item['details']['event_date']}\nQuantity:${item['details']['quantity']}",
                                   ),
                                   actions: [
                                     TextButton(
