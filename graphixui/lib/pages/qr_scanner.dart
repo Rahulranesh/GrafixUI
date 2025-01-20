@@ -65,6 +65,8 @@ class PwaScannerNotifier extends ChangeNotifier {
         final data = jsonDecode(response.body);
         additionalData = data['bookingData'];
 
+        debugPrint("Booking Data: ${additionalData.toString()}");
+
         ref.read(scanHistoryProvider.notifier).addScanRecord({
           'qrData': qrData,
           'status': data['valid'] == true ? 'Success' : 'Invalid',
@@ -75,47 +77,36 @@ class PwaScannerNotifier extends ChangeNotifier {
           context,
           ResultPage(
             isSuccess: data['valid'] == true,
-            data: {
-              'qrData': qrData,
-              'status': data['valid'] == true ? 'Valid' : 'Invalid',
-              'details': additionalData,
-            },
+            data: additionalData != null
+                ? {'bookingData': additionalData}
+                : {'bookingData': {}},
             onBack: resetScanner,
           ),
         );
       } else {
-        ref.read(scanHistoryProvider.notifier).addScanRecord({
-          'qrData': qrData,
-          'status': 'Error',
-          'details': null,
-        });
-
-        _navigateToResultPage(
-          context,
-          ResultPage(
-            isSuccess: false,
-            data: {'qrData': qrData, 'status': 'Error', 'details': null},
-            onBack: resetScanner,
-          ),
-        );
+        handleError(qrData, context);
       }
     } catch (e) {
       debugPrint("Exception occurred: $e");
-      ref.read(scanHistoryProvider.notifier).addScanRecord({
-        'qrData': qrData,
-        'status': 'Error',
-        'details': null,
-      });
-
-      _navigateToResultPage(
-        context,
-        ResultPage(
-          isSuccess: false,
-          data: {'qrData': qrData, 'status': 'Error', 'details': null},
-          onBack: resetScanner,
-        ),
-      );
+      handleError(qrData, context);
     }
+  }
+
+  void handleError(String qrData, BuildContext context) {
+    ref.read(scanHistoryProvider.notifier).addScanRecord({
+      'qrData': qrData,
+      'status': 'Error',
+      'details': null,
+    });
+
+    _navigateToResultPage(
+      context,
+      ResultPage(
+        isSuccess: false,
+        data: {'bookingData': {}}, // Pass an empty map on error
+        onBack: resetScanner,
+      ),
+    );
   }
 
   void _navigateToResultPage(BuildContext context, Widget page) {
