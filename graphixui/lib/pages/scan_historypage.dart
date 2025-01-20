@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart'; // Add this for date formatting
 
 final scanHistoryProvider =
     StateNotifierProvider<ScanHistoryNotifier, List<Map<String, dynamic>>>(
@@ -25,6 +26,29 @@ class ScanHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
 class ScanHistoryPage extends ConsumerWidget {
   const ScanHistoryPage({Key? key}) : super(key: key);
 
+  // Helper function to format date strings into readable format
+  String formatDate(String? dateString) {
+    if (dateString == null) return "N/A";
+    try {
+      final dateTime = DateTime.parse(dateString);
+      return DateFormat('MMMM dd, yyyy')
+          .format(dateTime); // e.g., January 20, 2025
+    } catch (e) {
+      return "Invalid Date";
+    }
+  }
+
+  // Helper function to format time strings into readable format
+  String formatTime(String? timeString) {
+    if (timeString == null) return "N/A";
+    try {
+      final dateTime = DateTime.parse(timeString);
+      return DateFormat('hh:mm a').format(dateTime); // e.g., 02:30 PM
+    } catch (e) {
+      return "Invalid Time";
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scanHistory = ref.watch(scanHistoryProvider);
@@ -35,7 +59,7 @@ class ScanHistoryPage extends ConsumerWidget {
           "Scan History (${scanHistory.length})", // Display the count
           style: const TextStyle(fontSize: 20, color: Colors.white),
         ),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: const Color.fromARGB(255, 14, 1, 63),
         actions: [
           if (scanHistory.isNotEmpty)
@@ -89,7 +113,13 @@ class ScanHistoryPage extends ConsumerWidget {
                                 builder: (context) => AlertDialog(
                                   title: const Text("QR Details"),
                                   content: Text(
-                                    "Event: ${movieTitle}\nBooking ID: ${item['details']['booking_id']}\nFirst Name: ${item['details']['first_name']}\nLast Name: ${item['details']['last_name']}\nEmail: ${item['details']['email']}\nEvent date: ${item['details']['event_date']}\nQuantity:${item['details']['quantity']}",
+                                    "Event: ${movieTitle}\n"
+                                    "Booking ID: ${item['details']['booking_id']}\n"
+                                    "First Name: ${item['details']['first_name']}\n"
+                                    "Last Name: ${item['details']['last_name']}\n"
+                                    "Event Date: ${formatDate(item['details']['event_date'])}\n"
+                                    "Start Time: ${formatTime(item['details']['start_date_time'])}\n"
+                                    "Quantity: ${item['details']['quantity']}",
                                   ),
                                   actions: [
                                     TextButton(

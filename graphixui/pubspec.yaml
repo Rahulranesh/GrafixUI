@@ -23,6 +23,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   image: ^4.5.2
   shared_preferences: ^2.3.5
+  intl: ^0.20.1
 
 
 dev_dependencies:

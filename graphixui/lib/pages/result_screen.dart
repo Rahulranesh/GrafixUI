@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ResultPage extends StatelessWidget {
   final bool isSuccess;
@@ -12,10 +13,42 @@ class ResultPage extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  // Format date-time strings into readable formats
+  String formatDateTime(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) {
+      return "N/A";
+    }
+    try {
+      final DateTime parsedDate = DateTime.parse(dateTime);
+      final String formattedDate = DateFormat('EEE, dd MMM').format(parsedDate);
+      final String formattedTime = DateFormat('h:mm a').format(parsedDate);
+      return '$formattedDate at $formattedTime';
+    } catch (e) {
+      return "N/A";
+    }
+  }
+
+  String formatDate(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) {
+      return "N/A";
+    }
+    try {
+      final DateTime parsedDate = DateTime.parse(dateTime);
+      return DateFormat('EEE, dd MMM yyyy').format(parsedDate);
+    } catch (e) {
+      return "N/A";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Extract booking data for convenience
     final bookingData = data['bookingData'] ?? {};
+
+    // Format the dates
+    final String formattedEventDate = formatDate(bookingData['event_date']);
+    final String formattedStartDateTime =
+        formatDateTime(bookingData['start_date_time']);
 
     return Scaffold(
       body: Center(
@@ -103,19 +136,6 @@ class ResultPage extends StatelessWidget {
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      "Email:",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    Text(
-                      bookingData['email'] ?? "N/A",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 10),
 
                     Text(
                       "Event Date:",
@@ -126,13 +146,12 @@ class ResultPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      bookingData['event_date'] ?? "N/A",
+                      formattedEventDate,
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 10),
-
                     Text(
-                      "Start time:",
+                      "Start Time:",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -140,7 +159,7 @@ class ResultPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      bookingData['start_date_time'] ?? "N/A",
+                      formattedStartDateTime,
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 10),
