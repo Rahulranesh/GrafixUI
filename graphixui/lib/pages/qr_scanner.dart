@@ -50,73 +50,64 @@ class PwaScannerNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> verifyQR(String qrData, BuildContext context) async {
-    final url =
-        Uri.parse("https://api.ticketverz.com/api/bookings/verifyQrCode");
+   Future<void> verifyQR(String qrData, BuildContext context) async {
+  final url = Uri.parse("https://api.ticketverz.com/api/bookings/verifyQrCode");
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'qrCodeData': qrData}),
-      );
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'qrCodeData': qrData}),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        additionalData = data['bookingData'];
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      additionalData = data['bookingData'];
 
-        ref.read(scanHistoryProvider.notifier).addScanRecord({
-          'qrData': qrData,
-          'status': data['valid'] == true ? 'Success' : 'Invalid',
-          'details': additionalData,
-        });
+      debugPrint("Booking Data: ${additionalData.toString()}");
 
-        _navigateToResultPage(
-          context,
-          ResultPage(
-            isSuccess: data['valid'] == true,
-            data: {
-              'qrData': qrData,
-              'status': data['valid'] == true ? 'Valid' : 'Invalid',
-              'details': additionalData,
-            },
-            onBack: resetScanner,
-          ),
-        );
-      } else {
-        ref.read(scanHistoryProvider.notifier).addScanRecord({
-          'qrData': qrData,
-          'status': 'Error',
-          'details': null,
-        });
-
-        _navigateToResultPage(
-          context,
-          ResultPage(
-            isSuccess: false,
-            data: {'qrData': qrData, 'status': 'Error', 'details': null},
-            onBack: resetScanner,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint("Exception occurred: $e");
       ref.read(scanHistoryProvider.notifier).addScanRecord({
         'qrData': qrData,
-        'status': 'Error',
-        'details': null,
+        'status': data['valid'] == true ? 'Success' : 'Invalid',
+        'details': additionalData,
       });
 
       _navigateToResultPage(
         context,
         ResultPage(
-          isSuccess: false,
-          data: {'qrData': qrData, 'status': 'Error', 'details': null},
+          isSuccess: data['valid'] == true,
+          data: additionalData != null
+              ? {'bookingData': additionalData}
+              : {'bookingData': {}},
           onBack: resetScanner,
         ),
       );
+    } else {
+      handleError(qrData, context);
     }
+  } catch (e) {
+    debugPrint("Exception occurred: $e");
+    handleError(qrData, context);
   }
+}
+
+void handleError(String qrData, BuildContext context) {
+  ref.read(scanHistoryProvider.notifier).addScanRecord({
+    'qrData': qrData,
+    'status': 'Error',
+    'details': null,
+  });
+
+  _navigateToResultPage(
+    context,
+    ResultPage(
+      isSuccess: false,
+      data: {'bookingData': {}}, // Pass an empty map on error
+      onBack: resetScanner,
+    ),
+  );
+}
+
 
   void _navigateToResultPage(BuildContext context, Widget page) {
     Navigator.push(
