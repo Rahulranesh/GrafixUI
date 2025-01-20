@@ -50,21 +50,21 @@ class PwaScannerNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> verifyQR(String qrData, BuildContext context) async {
-    final url =
-        Uri.parse("https://api.ticketverz.com/api/bookings/verifyQrCode");
+   Future<void> verifyQR(String qrData, BuildContext context) async {
+  final url = Uri.parse("https://api.ticketverz.com/api/bookings/verifyQrCode");
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'qrCodeData': qrData}),
-      );
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'qrCodeData': qrData}),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        additionalData = data['bookingData'];
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      additionalData = data['bookingData'];
 
+<<<<<<< HEAD
         debugPrint("Booking Data: ${additionalData.toString()}");
 
         ref.read(scanHistoryProvider.notifier).addScanRecord({
@@ -88,9 +88,52 @@ class PwaScannerNotifier extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint("Exception occurred: $e");
+=======
+      debugPrint("Booking Data: ${additionalData.toString()}");
+
+      ref.read(scanHistoryProvider.notifier).addScanRecord({
+        'qrData': qrData,
+        'status': data['valid'] == true ? 'Success' : 'Invalid',
+        'details': additionalData,
+      });
+
+      _navigateToResultPage(
+        context,
+        ResultPage(
+          isSuccess: data['valid'] == true,
+          data: additionalData != null
+              ? {'bookingData': additionalData}
+              : {'bookingData': {}},
+          onBack: resetScanner,
+        ),
+      );
+    } else {
+>>>>>>> 1e3d817663a9602e45146d398a5e5f12b9752828
       handleError(qrData, context);
     }
+  } catch (e) {
+    debugPrint("Exception occurred: $e");
+    handleError(qrData, context);
   }
+}
+
+void handleError(String qrData, BuildContext context) {
+  ref.read(scanHistoryProvider.notifier).addScanRecord({
+    'qrData': qrData,
+    'status': 'Error',
+    'details': null,
+  });
+
+  _navigateToResultPage(
+    context,
+    ResultPage(
+      isSuccess: false,
+      data: {'bookingData': {}}, // Pass an empty map on error
+      onBack: resetScanner,
+    ),
+  );
+}
+
 
   void handleError(String qrData, BuildContext context) {
     ref.read(scanHistoryProvider.notifier).addScanRecord({
