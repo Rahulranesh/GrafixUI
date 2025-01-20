@@ -262,37 +262,43 @@ class PwaScanner extends ConsumerWidget {
 
   Widget _buildScannerUI(PwaScannerNotifier provider, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          const Text(
-            "Please Scan Your Ticket Below",
-            style: TextStyle(
-              fontSize: 22,
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            const Text(
+              "Please Scan Your Ticket Below",
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 30),
-          Card(
-            elevation: 15,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.width * 0.8,
-                child: MobileScanner(
-                  controller: provider.scannerController,
-                  onDetect: (barcode) => provider.handleScan(barcode, context),
+            const SizedBox(height: 30),
+            Card(
+              elevation: 15,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.width * 0.8,
+                    child: MobileScanner(
+                      controller: provider.scannerController,
+                      onDetect: (barcode) =>
+                          provider.handleScan(barcode, context),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
